@@ -33,7 +33,8 @@ const meta = [
 const nav = threeDNav(lang, false);
 ---
 
-<BaseLayout lang={lang} title={title} description={summary} alternate={alternate} nav={nav} current="works">
+<BaseLayout
+  zone="3d" lang={lang} title={title} description={summary} alternate={alternate} nav={nav} current="works">
   <article class="case">
     <a class="back lc" href={localePath(lang, '3d/#works')}>← {tr('projects.back')}</a>
 

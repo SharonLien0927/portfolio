@@ -14,7 +14,7 @@ npm run dev      # 打開 http://localhost:4321/portfolio/
 | 想改的東西 | 檔案位置 |
 |---|---|
 | 名字、email、社群連結、表單金鑰 | `src/config.ts` |
-| 網站風格（奶油亮色／水晶深色） | `src/config.ts` 的 `theme` |
+| 網站風格（奶油亮色／水晶深色／夢境淺色分區／夜色深色分區） | `src/config.ts` 的 `theme`；分區配色在 `src/styles/theme-night.css`（深色）、`theme-dream.css`（淺色） |
 | 配色、字型 | `src/styles/global.css` 最上面那一段；水晶主題在 `src/styles/theme-crystal.css` |
 | Hero、About、Contact 的文字 | `src/content/pages/zh-tw/*.mdx`、`src/content/pages/en/*.mdx` |
 | 3D 作品（`/3d/` 頁與案例頁） | `src/content/projects/zh-tw/`、`src/content/projects/en/` |

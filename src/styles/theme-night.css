@@ -1,0 +1,233 @@
+/*
+  夜色主題：水晶深色底 + 分區光色
+  底色、文字、版面都沿用 theme-crystal.css，這裡只依區域換「光」與點綴色
+  （<html data-theme="crystal" data-zoned data-zone="home|3d|yarn">）
+
+  3D 區用圖 1：#7181c8 #ababdc #b7d3f4 #f1cfed #f1e5f6
+  編織區用圖 2：#3e668f #81a9ee #aab4e7 #ffdb83 #fff2d0
+  首頁：兩組共有的薰衣草紫為基底，紫光與蜂蜜色暖光各在一角
+*/
+
+/* ---------- 首頁（融合） ---------- */
+html[data-zoned] {
+  --holo: linear-gradient(115deg, #f1cfed 0%, #ababdc 35%, #aab4e7 60%, #ffdb83 100%);
+  --holo-soft: linear-gradient(115deg, #f1cfed 0%, #d9d6f0 40%, #c9d3f3 65%, #ffe6a8 100%);
+  --holo-3d: linear-gradient(115deg, #c6dcf7 0%, #c9c9ea 50%, #f3d6ef 100%);
+  --holo-yarn: linear-gradient(115deg, #a9c3f3 0%, #c5cbee 45%, #ffe2a0 100%);
+  --violet: #4e5aa2;
+  --indigo: #283e63;
+  --lavender: #bcb8d5;
+  --slate: #7c84af;
+  --pink: #e6b8d6;
+  --butter: rgb(188 184 213 / 0.16);
+  --sky: #bcb8d5;
+  --leaf: #e6b8d6;
+  --glow-a: rgb(113 129 200 / 0.38);
+  --glow-b: rgb(255 219 131 / 0.14);
+  --zone-mark: #ababdc;
+}
+
+/* 首頁：藍為主、帶一點紫——跟整片紫的 3D 頁、藍加暖黃的編織頁都分得開 */
+html[data-zoned][data-zone='home'] {
+  --night: #09101f;
+  --violet: #5a66b0;
+  --indigo: #1d3350;
+  --glass: rgb(150 176 225 / 0.07);
+  --glass-line: rgb(165 186 230 / 0.22);
+  --muted: #a4b0cc;
+}
+
+/* 底色本身就是斜向漸層：左邊深海軍藍（編織）→ 右邊深紫（3D），一打開就看得出是兩區融合 */
+html[data-zoned][data-zone='home'] body {
+  background:
+    radial-gradient(60vw 50vw at 0% 15%, rgb(62 102 143 / 0.5), transparent 70%),
+    radial-gradient(45vw 35vw at 100% 0%, rgb(113 129 200 / 0.35), transparent 70%),
+    radial-gradient(30vw 22vw at 10% 100%, rgb(255 219 131 / 0.1), transparent 70%),
+    linear-gradient(115deg, #0f2038 0%, #121c38 45%, #1a1840 100%);
+  background-attachment: fixed;
+}
+
+/* 側欄由上而下從紫漸變到海軍藍 */
+html[data-zoned][data-zone='home'] .side {
+  background:
+    radial-gradient(120% 50% at 0% 0%, rgb(241 207 237 / 0.22), transparent 60%),
+    linear-gradient(175deg, #5a66b0 0%, #3e568f 50%, #1d3350 100%);
+}
+
+html[data-zoned][data-zone='home'] :is(.ready, .soon, .footer) {
+  background:
+    radial-gradient(80% 120% at 100% 0%, rgb(171 171 220 / 0.3), transparent 60%),
+    linear-gradient(160deg, #3e568f, #1d3350);
+}
+
+/* ---------- 3D 區：粉紫光 ---------- */
+html[data-zoned][data-zone='3d'] {
+  --holo: linear-gradient(115deg, #f1cfed 0%, #ababdc 35%, #b7d3f4 60%, #7181c8 100%);
+  --holo-soft: var(--holo-3d);
+  --violet: #5a66b0;
+  --indigo: #343762;
+  --lavender: #ababdc;
+  --slate: #7181c8;
+  --pink: #f1cfed;
+  --butter: rgb(241 207 237 / 0.16);
+  --sky: #ababdc;
+  --leaf: #f1cfed;
+  --glow-a: rgb(113 129 200 / 0.42);
+  --glow-b: rgb(241 207 237 / 0.2);
+  --zone-mark: #f1cfed;
+}
+
+/* ---------- 編織區：藍光 + 蜂蜜色暖光 ---------- */
+html[data-zoned][data-zone='yarn'] {
+  --holo: linear-gradient(115deg, #ffdb83 0%, #aab4e7 45%, #81a9ee 75%, #3e668f 100%);
+  --holo-soft: var(--holo-yarn);
+  --violet: #3e668f;
+  --indigo: #1d3350;
+  --lavender: #aab4e7;
+  --slate: #81a9ee;
+  --pink: #ffdb83;
+  --butter: rgb(255 219 131 / 0.14);
+  --sky: #aab4e7;
+  --leaf: #ffdb83;
+  --glow-a: rgb(62 102 143 / 0.6);
+  --glow-b: rgb(255 219 131 / 0.18);
+  --glow-c: rgb(129 169 238 / 0.22);
+  --zone-mark: #ffdb83;
+
+  /* 底色從帶紫的近黑換成帶藍的近黑，玻璃與灰字也改成偏藍 */
+  --night: #08111f;
+  --glass: rgb(129 169 238 / 0.07);
+  --glass-line: rgb(170 190 231 / 0.22);
+  --ink: #e8eef8;
+  --muted: #a3b4cf;
+  --white: #12203a;
+  --dash: rgb(170 190 231 / 0.28);
+}
+
+html[data-zoned][data-zone='yarn'] body {
+  background:
+    radial-gradient(60vw 50vw at 85% 0%, var(--glow-a), transparent 70%),
+    radial-gradient(40vw 35vw at 55% 45%, var(--glow-c), transparent 70%),
+    radial-gradient(50vw 40vw at 0% 100%, var(--glow-b), transparent 70%),
+    var(--night);
+  background-attachment: fixed;
+}
+
+html[data-zoned][data-zone='yarn'] .side .nav > li.open,
+html[data-zoned][data-zone='yarn'] .side .foot,
+html[data-zoned][data-zone='yarn'] .side .menu-toggle {
+  background: rgb(8 17 31 / 0.5);
+}
+
+html[data-zoned] body {
+  background:
+    radial-gradient(60vw 50vw at 85% 0%, var(--glow-a), transparent 70%),
+    radial-gradient(50vw 40vw at 0% 100%, var(--glow-b), transparent 70%),
+    var(--night);
+  background-attachment: fixed;
+}
+
+/* 首頁的兩顆入口按鈕各用自己區域的顏色 */
+html[data-zoned][data-zone='home'] .btn--sky { background: var(--holo-3d); }
+html[data-zoned][data-zone='home'] .btn--butter { background: var(--holo-yarn); }
+
+/* 側欄選單裡「3D 作品」「編織」的顏色記號 */
+html[data-zoned] .side .nav > li[data-target='3d'] { box-shadow: inset 3px 0 0 #ababdc; }
+html[data-zoned] .side .nav > li[data-target='yarn'] { box-shadow: inset 3px 0 0 #ffdb83; }
+
+/* 強調字、標籤用區域色 */
+html[data-zoned] .tag {
+  background: var(--butter);
+  color: var(--ink);
+}
+
+html[data-zoned] .side .badge span,
+html[data-zoned] .side .bullets li::before {
+  color: var(--zone-mark);
+}
+
+/* ---------- 圓形圖示固定代表兩區：方塊 = 圖 1、毛線球 = 圖 2 ---------- */
+html[data-zoned] .orb.cube {
+  background: conic-gradient(from 200deg, #7181c8, #ababdc, #b7d3f4, #f1cfed, #ababdc, #7181c8);
+  box-shadow: 0 0 0.25em rgb(171 171 220 / 0.4);
+}
+
+html[data-zoned] .orb.yarn {
+  background: linear-gradient(170deg, #81a9ee 0%, #aab4e7 50%, #ffdb83 100%);
+  box-shadow: 0 0 0.25em rgb(255 219 131 / 0.35);
+}
+
+html[data-zoned] .orb.yarn .thread {
+  filter: drop-shadow(0 0 1.5px rgb(29 51 80 / 0.7));
+}
+
+/* ---------- 3D 作品畫面一律用圖 1（首頁也一樣） ---------- */
+html[data-zoned] .media .placeholder,
+html[data-zoned] .hero-media .placeholder {
+  background:
+    radial-gradient(circle at 72% 30%, rgb(255 255 255 / 0.45), transparent 22%),
+    radial-gradient(circle at 25% 78%, rgb(241 207 237 / 0.85), transparent 45%),
+    linear-gradient(150deg, #b7d3f4, #ababdc 40%, #7181c8 70%, #343762);
+}
+
+html[data-zoned] .thumb,
+html[data-zoned] .preview {
+  background: var(--holo-3d) !important;
+}
+
+/* ---------- 編織作品畫面一律用圖 2（首頁也一樣） ---------- */
+html[data-zoned] .piece .media {
+  background: radial-gradient(circle at 50% 40%, rgb(255 219 131 / 0.22), rgb(62 102 143 / 0.35)) !important;
+}
+
+html[data-zoned] .piece .yarn {
+  fill: #ffdb83;
+}
+
+html[data-zoned] .piece-page .placeholder {
+  background: radial-gradient(circle at 50% 40%, rgb(255 219 131 / 0.22), rgb(62 102 143 / 0.35));
+}
+
+html[data-zoned] .piece .tag {
+  background: rgb(170 180 231 / 0.18);
+  color: var(--ink);
+}
+
+html[data-zoned] .piece .tag.available {
+  background: linear-gradient(115deg, #ffe2a0, #ffdb83);
+  color: #1d3350;
+}
+
+html[data-zoned] .banner {
+  border-color: rgb(255 219 131 / 0.25);
+  background:
+    radial-gradient(60% 120% at 50% 100%, rgb(62 102 143 / 0.55), transparent 70%),
+    rgb(255 219 131 / 0.06);
+}
+
+html[data-zoned] .banner rect:first-of-type { fill: #ffdb83; }
+html[data-zoned] .banner rect:last-of-type { fill: #81a9ee; }
+html[data-zoned] .banner circle { fill: #aab4e7; }
+
+/* ---------- 服務：數位用圖 1、手作用圖 2 ---------- */
+html[data-zoned] .service[data-group='digital'] .stickers span:first-child { background: #ababdc !important; }
+html[data-zoned] .service[data-group='digital'] .stickers span:last-child { background: #f1cfed !important; }
+html[data-zoned] .service[data-group='handmade'] .stickers span:first-child { background: #81a9ee !important; }
+html[data-zoned] .service[data-group='handmade'] .stickers span:last-child { background: #ffdb83 !important; }
+html[data-zoned] .col[data-group='digital'] .dot { background: #ababdc; }
+html[data-zoned] .col[data-group='handmade'] .dot { background: #ffdb83; }
+
+/* 首頁聯絡表單的信封：從紫改成偏藍，跟首頁的融合色一致 */
+html[data-zoned][data-zone='home'] .envelope::before {
+  background: rgb(62 86 143 / 0.3);
+}
+
+html[data-zoned][data-zone='home'] .pocket {
+  background:
+    linear-gradient(to top right, #253a62 50%, transparent 50.5%) left / 50.5% 100% no-repeat,
+    linear-gradient(to top left, #253a62 50%, transparent 50.5%) right / 50.5% 100% no-repeat;
+}
+
+html[data-zoned][data-zone='home'] .pocket::after {
+  background: #253a62;
+}

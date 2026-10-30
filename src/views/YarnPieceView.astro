@@ -34,7 +34,8 @@ const meta = [
 ].filter((m) => m.value);
 ---
 
-<BaseLayout lang={lang} title={title} description={summary} alternate={alternate} nav={yarnNav(lang, false)} current="works">
+<BaseLayout
+  zone="yarn" lang={lang} title={title} description={summary} alternate={alternate} nav={yarnNav(lang, false)} current="works">
   <article class="piece-page">
     <a class="back lc" href={localePath(lang, 'yarn/#works')}>← {tr('yarn.back')}</a>
 
