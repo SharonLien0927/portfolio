@@ -14,19 +14,28 @@ npm run dev      # 打開 http://localhost:4321/portfolio/
 | 想改的東西 | 檔案位置 |
 |---|---|
 | 名字、email、社群連結、表單金鑰 | `src/config.ts` |
-| 配色、字型 | `src/styles/global.css` 最上面那一段 |
+| 網站風格（奶油亮色／水晶深色） | `src/config.ts` 的 `theme` |
+| 配色、字型 | `src/styles/global.css` 最上面那一段；水晶主題在 `src/styles/theme-crystal.css` |
 | Hero、About、Contact 的文字 | `src/content/pages/zh-tw/*.mdx`、`src/content/pages/en/*.mdx` |
-| 作品（案例頁） | `src/content/projects/zh-tw/`、`src/content/projects/en/` |
+| 3D 作品（`/3d/` 頁與案例頁） | `src/content/projects/zh-tw/`、`src/content/projects/en/` |
+| 3D 頁開頭、合作流程 | `src/content/pages/*/3d-intro.mdx`、`3d-process.mdx` |
 | 服務卡片 | `src/content/services/`（`group: digital` 或 `handmade`） |
-| 鉤織作品 | `src/content/crochet/` |
-| 鉤織客製流程步驟 | `src/content/pages/*/crochet-process.mdx` |
+| 編織作品（`/yarn/` 頁與作品頁） | `src/content/yarn/zh-tw/`、`src/content/yarn/en/` |
+| 編織頁開頭、客製流程 | `src/content/pages/*/yarn-intro.mdx`、`yarn-process.mdx` |
 | 按鈕、選單等短字 | `src/i18n/ui.ts` |
 
-**新增一個作品：** 在 `src/content/projects/zh-tw/` 複製一個 `.mdx` 檔改內容，英文版放在 `en/`，**兩邊用同一個檔名**，語言切換才會對得上。
+**新增作品：** 複製一個 `.mdx` 檔改內容，中文放 `zh-tw/`、英文放 `en/`，**兩邊用同一個檔名**，語言切換才會對得上。檔名就是網址，例如 `bear.mdx` → `/yarn/bear/`。
 
-- 封面圖：放進 `src/assets/images/`，在 frontmatter 寫 `cover: "../../../assets/images/檔名.jpg"`
-- hover 影片：放進 `public/videos/`，寫 `video: "videos/檔名.mp4"`（建議 5–10 秒、靜音、1–3 MB 以內）
-- `order` 數字小的排前面
+3D 作品的欄位：
+- `category`：分類，3D 頁上方的篩選按鈕會自動依這個產生（例如「產品渲染」「動態影像」）
+- `cover`：封面圖，放進 `src/assets/images/`，寫 `cover: "../../../assets/images/檔名.jpg"`
+- `video`：hover 影片，放進 `public/videos/`，寫 `video: "videos/檔名.mp4"`（建議 5–10 秒、靜音、1–3 MB 以內）
+- `order`：數字小的排前面；首頁只顯示前 4 件（1 件精選 + 3 件列表）
+
+編織作品的欄位：
+- `technique`：`knit`（棒針）、`crochet`（鉤針）、`mixed`（兩種都有）
+- `yarn`：線材，`size`：尺寸，`status`：`available` 現貨、`commission` 可客製、`sold` 已售出
+- `cover`：封面圖，`gallery`：作品頁下方的更多照片，寫成清單 `gallery: ["../../../assets/images/a.jpg", "../../../assets/images/b.jpg"]`
 
 ## 聯絡表單
 

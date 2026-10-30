@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/sections/Hero.astro';
 import Projects from '../components/sections/Projects.astro';
+import YarnPreview from '../components/sections/YarnPreview.astro';
 import About from '../components/sections/About.astro';
 import Services from '../components/sections/Services.astro';
 import Contact from '../components/sections/Contact.astro';
@@ -23,10 +24,11 @@ const nav = await homeNav(lang, true);
 
 <BaseLayout lang={lang} description={hero.data.title} alternate={localePath(otherLang(lang))} nav={nav}>
   <Hero lang={lang} page={hero}>
-    <a class="btn btn--sky lc" href="#projects">{tr('hero.cta3d')} →</a>
-    <a class="btn btn--butter lc" href={localePath(lang, 'crochet/')}>{tr('hero.ctaCrochet')} →</a>
+    <a class="btn btn--sky lc" href={localePath(lang, '3d/')}>{tr('hero.cta3d')} →</a>
+    <a class="btn btn--butter lc" href={localePath(lang, 'yarn/')}>{tr('hero.ctaYarn')} →</a>
   </Hero>
   <Projects lang={lang} />
+  <YarnPreview lang={lang} />
   <About page={about} />
   <Services lang={lang} />
   <Contact lang={lang} />

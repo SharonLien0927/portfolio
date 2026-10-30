@@ -2,11 +2,11 @@
 import { render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/sections/Hero.astro';
-import CrochetCard from '../components/CrochetCard.astro';
+import YarnCard from '../components/YarnCard.astro';
 import ProcessSteps from '../components/ProcessSteps.astro';
 import ComingSoon from '../components/ComingSoon.astro';
 import { getLocalized, getPage } from '../lib/content';
-import { crochetNav } from '../lib/nav';
+import { yarnNav } from '../lib/nav';
 import { localePath, otherLang, t } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -16,28 +16,28 @@ interface Props {
 
 const { lang } = Astro.props;
 const tr = t(lang);
-const intro = await getPage('crochet-intro', lang);
-const process = await getPage('crochet-process', lang);
+const intro = await getPage('yarn-intro', lang);
+const process = await getPage('yarn-process', lang);
 const { Content: ProcessIntro } = await render(process);
-const pieces = await getLocalized('crochet', lang);
+const pieces = await getLocalized('yarn', lang);
 ---
 
 <BaseLayout
   lang={lang}
-  title={tr('nav.crochet')}
+  title={tr('nav.yarn')}
   description={intro.data.title}
-  alternate={localePath(otherLang(lang), 'crochet/')}
-  nav={crochetNav(lang)}
+  alternate={localePath(otherLang(lang), 'yarn/')}
+  nav={yarnNav(lang)}
 >
   <Hero lang={lang} page={intro}>
-    <a class="btn btn--leaf lc" href={localePath(lang, '#contact')}>{tr('crochet.cta')} →</a>
+    <a class="btn btn--leaf lc" href={localePath(lang, '#contact')}>{tr('yarn.cta')} →</a>
     <a class="btn btn--butter lc" href="#process">{tr('nav.process')}</a>
   </Hero>
 
   <section id="works" class="section works">
-    <h2 class="h2">{tr('crochet.works')}</h2>
+    <h2 class="h2">{tr('yarn.works')}</h2>
     <div class="grid">
-      {pieces.map((entry, i) => <CrochetCard entry={entry} lang={lang} index={i} />)}
+      {pieces.map((entry, i) => <YarnCard entry={entry} lang={lang} index={i} />)}
     </div>
   </section>
 
@@ -47,7 +47,7 @@ const pieces = await getLocalized('crochet', lang);
     {process.data.steps && <ProcessSteps steps={process.data.steps} />}
   </section>
 
-  <section id="soon" class="section soon">
+  <section id="soon" class="section soon-section">
     <ComingSoon lang={lang} />
   </section>
 </BaseLayout>
@@ -81,7 +81,7 @@ const pieces = await getLocalized('crochet', lang);
     text-align: center;
   }
 
-  .soon {
+  .soon-section {
     padding-bottom: 0;
   }
 </style>

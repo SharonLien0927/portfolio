@@ -1,11 +1,12 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
-import { t } from '../i18n/utils';
+import { splitId } from '../lib/content';
+import { localePath, t } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
 interface Props {
-  entry: CollectionEntry<'crochet'>;
+  entry: CollectionEntry<'yarn'>;
   lang: Lang;
   index: number;
 }
@@ -13,9 +14,11 @@ interface Props {
 const { entry, lang, index } = Astro.props;
 const { title, summary, status, cover } = entry.data;
 const tints = ['#fff5d4', '#e3f6fd', '#eef7e7', '#fff9c2'];
+const href = localePath(lang, `yarn/${splitId(entry.id).slug}/`);
 ---
 
 <article class="piece card">
+  <a class="link" href={href}>
   <div class="media" style={`background:${tints[index % tints.length]}`}>
     {
       cover ? (
@@ -31,13 +34,25 @@ const tints = ['#fff5d4', '#e3f6fd', '#eef7e7', '#fff9c2'];
   <div class="info">
     <div class="head">
       <h3>{title}</h3>
-      <span class:list={['tag', status]}>{t(lang)(`crochet.status.${status}`)}</span>
+      <span class:list={['tag', status]}>{t(lang)(`yarn.status.${status}`)}</span>
     </div>
     <p class="muted">{summary}</p>
   </div>
+  </a>
 </article>
 
 <style>
+  .link {
+    display: block;
+    text-decoration: none;
+  }
+
+  .link:hover h3 {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+
   .piece {
     overflow: hidden;
     transition: border-color 0.2s, transform 0.2s;

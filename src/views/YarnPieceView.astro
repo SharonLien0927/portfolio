@@ -1,0 +1,232 @@
+---
+import { Image } from 'astro:assets';
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Orb from '../components/Orb.astro';
+import { getLocalized, splitId } from '../lib/content';
+import { yarnNav } from '../lib/nav';
+import { localePath, otherLang, t } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  slug: string;
+}
+
+const { lang, slug } = Astro.props;
+const tr = t(lang);
+const entry = (await getEntry('yarn', `${lang}/${slug}`))!;
+const { Content } = await render(entry);
+const { title, summary, status, technique, yarn, size, cover, gallery } = entry.data;
+
+// 另一個語言有同名檔案就連過去，沒有就回另一個語言的編織頁
+const other = otherLang(lang);
+const translated = await getEntry('yarn', `${other}/${slug}`);
+const alternate = localePath(other, translated ? `yarn/${slug}/` : 'yarn/');
+
+const all = await getLocalized('yarn', lang);
+const next = all[(all.findIndex((p) => p.id === entry.id) + 1) % all.length];
+const meta = [
+  { label: tr('yarn.status'), value: tr(`yarn.status.${status}`) },
+  { label: tr('yarn.technique'), value: technique && tr(`technique.${technique}`) },
+  { label: tr('yarn.yarn'), value: yarn },
+  { label: tr('yarn.size'), value: size },
+].filter((m) => m.value);
+---
+
+<BaseLayout lang={lang} title={title} description={summary} alternate={alternate} nav={yarnNav(lang, false)} current="works">
+  <article class="piece-page">
+    <a class="back lc" href={localePath(lang, 'yarn/#works')}>← {tr('yarn.back')}</a>
+
+    <div class="layout">
+      <div class="photo">
+        {
+          cover ? (
+            <Image src={cover} alt={title} widths={[600, 900, 1200]} sizes="(min-width: 810px) 45vw, 100vw" loading="eager" />
+          ) : (
+            <div class="placeholder"><Orb kind="yarn" size="42%" /></div>
+          )
+        }
+      </div>
+
+      <div class="info">
+        <h1>{title}</h1>
+        <p class="summary muted">{summary}</p>
+        <dl class="meta">
+          {
+            meta.map((m) => (
+              <div>
+                <dt class="muted lc">{m.label}</dt>
+                <dd>{m.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <div class="prose"><Content /></div>
+        <a class="btn btn--leaf lc" href={localePath(lang, '#contact')}>{tr('yarn.cta')} →</a>
+      </div>
+    </div>
+
+    {
+      gallery.length > 0 && (
+        <div class="gallery">
+          {gallery.map((img) => (
+            <Image src={img} alt={title} widths={[400, 700]} sizes="(min-width: 810px) 33vw, 100vw" />
+          ))}
+        </div>
+      )
+    }
+
+    {
+      next && next.id !== entry.id && (
+        <a class="next" href={localePath(lang, `yarn/${splitId(next.id).slug}/`)}>
+          <span class="muted lc">{tr('yarn.next')}</span>
+          <strong>{next.data.title}</strong>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .piece-page {
+    max-width: 1100px;
+    margin-inline: auto;
+    padding-top: clamp(32px, 6vw, 72px);
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 28px;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .back:hover {
+    text-decoration: underline;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: clamp(24px, 4vw, 56px);
+  }
+
+  .photo {
+    position: sticky;
+    top: 24px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    border-radius: var(--radius);
+    background: var(--cream);
+  }
+
+  .photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .placeholder {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    background: radial-gradient(circle at 50% 40%, var(--cream), var(--sand));
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+  }
+
+  .summary {
+    margin: 12px 0 24px;
+    font-size: 1.1rem;
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin: 0 0 24px;
+    border-top: 1.5px dashed var(--dash);
+  }
+
+  .meta div {
+    padding: 10px 0;
+    border-bottom: 1.5px dashed var(--dash);
+  }
+
+  dt {
+    font-size: 0.8rem;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .prose {
+    margin-bottom: 28px;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 48px;
+  }
+
+  .gallery :global(img) {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  .next {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 4px 16px;
+    margin-top: 72px;
+    padding: 20px 0;
+    border-block: 1.5px dashed var(--dash);
+    text-decoration: none;
+    transition: padding 0.2s, background 0.2s;
+  }
+
+  .next:hover {
+    padding-inline: 12px;
+    background: var(--cream);
+  }
+
+  .next .muted {
+    font-size: 0.85rem;
+  }
+
+  .next strong {
+    grid-column: 1;
+    font: 600 clamp(1.4rem, 3vw, 2rem) / 1.2 var(--font-display);
+  }
+
+  .arrow {
+    grid-row: 1 / 3;
+    grid-column: 2;
+    font-size: 1.6rem;
+  }
+
+  @media (max-width: 809px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+
+    .photo {
+      position: static;
+    }
+
+    .gallery {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

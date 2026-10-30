@@ -11,24 +11,52 @@ interface Props {
 
 const { lang, page } = Astro.props;
 const { Content } = await render(page);
-const [l1 = page.data.title, l2 = '', l3 = ''] = page.data.lines ?? [];
+const lines = page.data.lines ?? [page.data.title];
+const [l1 = page.data.title, l2 = '', l3 = ''] = lines;
 const since = page.data.since;
 const sinceLabel = t(lang)('since');
+const below = page.data.leadPosition === 'below';
 ---
 
 <section class="hero">
   <h1 class="visually-hidden">{page.data.title}</h1>
-  <div class="headline">
-    <div class="row" aria-hidden="true"><span class="big"><BigLines text={l1} since={since} sinceLabel={sinceLabel} /></span></div>
-    <div class="row r2">
-      <div class="lead"><Content /></div>
-      <span class="big" aria-hidden="true"><BigLines text={l2} since={since} sinceLabel={sinceLabel} /></span>
-    </div>
-    <div class="row r3">
-      <span class="big" aria-hidden="true"><BigLines text={l3} since={since} sinceLabel={sinceLabel} /></span>
-      <div class="ctas"><slot /></div>
-    </div>
-  </div>
+  {
+    below ? (
+      /* 階梯排法：每一行往右錯開，最後一行接按鈕，下方是 since 徽章 + 簡介 */
+      <div class="headline stair" style={`--steps: ${lines.length}`}>
+        {lines.map((line, i) => (
+          <div class:list={['row', { last: i === lines.length - 1 }]} style={`--i: ${i}`}>
+            <span class="big" aria-hidden="true">
+              <BigLines text={line} since={since} sinceLabel={sinceLabel} />
+            </span>
+            {i === lines.length - 1 && <div class="ctas"><slot /></div>}
+          </div>
+        ))}
+        <div class="row foot" style={`--i: ${lines.length}`}>
+          {since && (
+            <span class="big" aria-hidden="true">
+              <BigLines text="{since}" since={since} sinceLabel={sinceLabel} />
+            </span>
+          )}
+          <div class="lead"><Content /></div>
+        </div>
+      </div>
+    ) : (
+      <div class="headline">
+        <div class="row" aria-hidden="true">
+          <span class="big"><BigLines text={l1} since={since} sinceLabel={sinceLabel} /></span>
+        </div>
+        <div class="row r2">
+          <div class="lead"><Content /></div>
+          <span class="big" aria-hidden="true"><BigLines text={l2} since={since} sinceLabel={sinceLabel} /></span>
+        </div>
+        <div class="row r3">
+          <span class="big" aria-hidden="true"><BigLines text={l3} since={since} sinceLabel={sinceLabel} /></span>
+          <div class="ctas"><slot /></div>
+        </div>
+      </div>
+    )
+  }
 </section>
 
 <style>
@@ -93,6 +121,51 @@ const sinceLabel = t(lang)('since');
     font-size: inherit;
   }
 
+  /*
+    階梯排法（中文版首頁）：
+    兩行大字緊貼、開頭不對齊，第二行往右錯開；since 徽章和簡介再往右下一階，
+    整體是一條從左上往右下的斜線，視線自然走到按鈕和簡介
+  */
+  /* --gutter：兩行之間的上下距離 = 最後一行跟按鈕的左右距離，視覺上一致 */
+  .stair {
+    justify-items: start;
+    gap: var(--gutter);
+    --step: 1.1em;
+    --gutter: 0.3em;
+  }
+
+  :lang(zh-Hant-TW) .stair {
+    font-size: max(2.4rem, 9.4cqi);
+  }
+
+  .stair .row {
+    margin-left: calc(var(--i) * var(--step));
+  }
+
+  .stair .last {
+    gap: var(--gutter);
+  }
+
+  .stair .foot {
+    gap: 0.25em;
+  }
+
+  /* 簡介可以縮、可以換行，不會把版面撐出畫面 */
+  .stair {
+    max-width: 100%;
+  }
+
+  .stair .foot {
+    max-width: calc(100% - var(--i) * var(--step));
+  }
+
+  .stair .foot .lead {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 24em;
+    text-align: left;
+  }
+
   /* 平板：主欄比較窄，字級比例放大一點 */
   @media (min-width: 810px) and (max-width: 1199px) {
     .headline {
@@ -101,6 +174,11 @@ const sinceLabel = t(lang)('since');
 
     :lang(zh-Hant-TW) .headline {
       font-size: 11cqi;
+    }
+
+    :lang(zh-Hant-TW) .stair {
+      font-size: 11.5cqi;
+      --step: 0.8em;
     }
   }
 
@@ -130,6 +208,47 @@ const sinceLabel = t(lang)('since');
     .ctas {
       flex-direction: row;
       margin-top: 0.5em;
+    }
+
+    /* 手機的階梯：字小一點、行距拉開，左右留白；按鈕移到最下面 */
+    :lang(zh-Hant-TW) .stair {
+      font-size: 13cqi;
+      gap: 0.2em;
+      --step: 0.55em;
+    }
+
+    .stair .foot {
+      margin-top: 0.35em;
+      gap: 0.3em;
+    }
+
+    .stair .foot .lead {
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .stair .row {
+      flex-direction: row;
+    }
+
+    .stair .last {
+      display: contents;
+    }
+
+    /* 最後一行被拆開了（display: contents），縮排改加在字上；--i 會從 .last 繼承下來 */
+    .stair .last .big {
+      margin-left: calc(var(--i) * var(--step));
+    }
+
+    .stair .foot {
+      order: 1;
+      max-width: calc(100% - var(--i) * var(--step));
+    }
+
+    .stair .ctas {
+      order: 2;
+      justify-self: center;
+      margin-top: 28px;
     }
   }
 </style>

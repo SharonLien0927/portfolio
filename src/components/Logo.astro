@@ -1,26 +1,22 @@
 ---
-// 三個小圖示：3D 方塊、毛線球、圓點
+// 標誌：跟首頁大標題一樣的 3D 方塊、毛線球
+import Orb from './Orb.astro';
+
 interface Props {
   size?: number;
 }
 
-const { size = 24 } = Astro.props;
+const { size = 26 } = Astro.props;
 ---
 
 <span class="logo" aria-hidden="true" style={`--s: ${size}px`}>
-  <svg viewBox="0 0 24 24"><path d="M12 2 21 7v10l-9 5-9-5V7z" fill="#fff385" /><path d="M12 12 21 7M12 12 3 7M12 12v10" stroke="#30c0f0" stroke-width="1.6" fill="none" /></svg>
-  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#67b935" /><path d="M4 9c5 2 11 1 16-3M3 13c6 3 13 2 18-4M6 18c4 1 9 0 13-4" stroke="#fffdea" stroke-width="1.6" fill="none" stroke-linecap="round" /></svg>
-  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fffdea" /><circle cx="12" cy="12" r="4" fill="#30c0f0" /></svg>
+  <Orb kind="cube" size={`${size}px`} />
+  <Orb kind="yarn" size={`${size}px`} />
 </span>
 
 <style>
   .logo {
     display: inline-flex;
     gap: calc(var(--s) * 0.3);
-  }
-
-  svg {
-    width: var(--s);
-    height: var(--s);
   }
 </style>

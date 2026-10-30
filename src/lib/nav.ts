@@ -60,27 +60,42 @@ export async function homeNav(lang: Lang, onHome: boolean): Promise<NavItem[]> {
       label: tr('nav.contact'),
       detail: { text: tr('side.contactText') },
     },
-    {
-      id: 'crochet',
-      href: localePath(lang, 'crochet/'),
-      label: tr('nav.crochet'),
-      detail: { text: tr('side.crochetText') },
-    },
+    { id: '3d', href: localePath(lang, '3d/'), label: tr('nav.3d'), detail: { text: tr('side.3dText') } },
+    { id: 'yarn', href: localePath(lang, 'yarn/'), label: tr('nav.yarn'), detail: { text: tr('side.yarnText') } },
   ];
 }
 
-export function crochetNav(lang: Lang): NavItem[] {
+/** 3D 作品頁（onPage = 在 /3d/ 頁本身；案例頁傳 false，錨點會連回 /3d/） */
+export function threeDNav(lang: Lang, onPage = true): NavItem[] {
   const tr = t(lang);
+  const anchor = (id: string) => (onPage ? `#${id}` : localePath(lang, `3d/#${id}`));
   return [
-    { id: 'works', href: '#works', label: tr('nav.works'), detail: { text: tr('side.crochetText') } },
+    { id: 'works', href: anchor('works'), label: tr('threeD.works'), detail: { text: tr('side.3dText') } },
     {
       id: 'process',
-      href: '#process',
+      href: anchor('process'),
+      label: tr('nav.process3d'),
+      detail: { path: { label: tr('side.path'), steps: [tr('side.path1'), tr('side.path2'), tr('side.path3')] } },
+    },
+    { id: 'contact', href: localePath(lang, '#contact'), label: tr('nav.contact'), detail: { text: tr('side.contactText') } },
+    { id: 'yarn', href: localePath(lang, 'yarn/'), label: tr('nav.yarn'), detail: { text: tr('side.yarnText') } },
+  ];
+}
+
+/** 編織頁（onPage = 在 /yarn/ 頁本身；作品頁傳 false） */
+export function yarnNav(lang: Lang, onPage = true): NavItem[] {
+  const tr = t(lang);
+  const anchor = (id: string) => (onPage ? `#${id}` : localePath(lang, `yarn/#${id}`));
+  return [
+    { id: 'works', href: anchor('works'), label: tr('nav.works'), detail: { text: tr('side.yarnText') } },
+    {
+      id: 'process',
+      href: anchor('process'),
       label: tr('nav.process'),
       detail: { path: { label: tr('side.path'), steps: [tr('side.path1'), tr('side.path2'), tr('side.path3')] } },
     },
-    { id: 'soon', href: '#soon', label: tr('nav.soon'), detail: { text: tr('side.soonText') } },
+    { id: 'soon', href: anchor('soon'), label: tr('nav.soon'), detail: { text: tr('side.soonText') } },
     { id: 'contact', href: localePath(lang, '#contact'), label: tr('nav.contact'), detail: { text: tr('side.contactText') } },
-    { id: '3d', href: localePath(lang, '#projects'), label: tr('nav.3d') },
+    { id: '3d', href: localePath(lang, '3d/'), label: tr('nav.3d'), detail: { text: tr('side.3dText') } },
   ];
 }

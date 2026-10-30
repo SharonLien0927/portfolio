@@ -8,6 +8,8 @@ export default defineConfig({
   site: 'https://sharonlien0927.github.io',
   base: '/portfolio',
   integrations: [mdx()],
+  // 關掉本機預覽時畫面下方的 Astro 開發工具列（正式網站本來就不會出現）
+  devToolbar: { enabled: false },
   i18n: {
     locales: ['zh-tw', 'en'],
     defaultLocale: 'zh-tw',

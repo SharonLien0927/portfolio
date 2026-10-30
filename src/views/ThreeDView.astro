@@ -1,0 +1,80 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
+import WorkCard from '../components/WorkCard.astro';
+import FilterBar from '../components/FilterBar.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import { getLocalized, getPage } from '../lib/content';
+import { threeDNav } from '../lib/nav';
+import { localePath, otherLang, t } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+const intro = await getPage('3d-intro', lang);
+const process = await getPage('3d-process', lang);
+const { Content: ProcessIntro } = await render(process);
+const works = await getLocalized('projects', lang);
+const categories = [...new Set(works.map((w) => w.data.category))];
+---
+
+<BaseLayout
+  lang={lang}
+  title={tr('nav.3d')}
+  description={intro.data.title}
+  alternate={localePath(otherLang(lang), '3d/')}
+  nav={threeDNav(lang)}
+>
+  <Hero lang={lang} page={intro}>
+    <a class="btn btn--sky lc" href={localePath(lang, '#contact')}>{tr('threeD.cta')} →</a>
+    <a class="btn btn--butter lc" href="#process">{tr('nav.process3d')}</a>
+  </Hero>
+
+  <section id="works" class="section works">
+    <h2 class="h2">{tr('threeD.works')}</h2>
+    {categories.length > 1 && <FilterBar label={tr('filter.label')} allLabel={tr('filter.all')} categories={categories} target="work-grid" />}
+    <div class="grid" id="work-grid">
+      {works.map((entry, i) => <WorkCard entry={entry} lang={lang} index={i} />)}
+    </div>
+  </section>
+
+  <section id="process" class="section">
+    <h2 class="h2">{process.data.title}</h2>
+    <div class="process-intro muted"><ProcessIntro /></div>
+    {process.data.steps && <ProcessSteps steps={process.data.steps} />}
+  </section>
+</BaseLayout>
+
+<script>
+  import '../scripts/hover-video.ts';
+</script>
+
+<style>
+  .works {
+    padding-top: 0;
+  }
+
+  /* 3D 作品用大方塊：桌機與平板兩欄、手機一欄 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px 20px;
+  }
+
+  @media (max-width: 809px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+  }
+
+  .process-intro {
+    margin: -28px auto 32px;
+    text-align: center;
+  }
+</style>

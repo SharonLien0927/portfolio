@@ -1,5 +1,7 @@
 // 網站基本資料：改這裡就會套用到全站
 export const site = {
+  // 網站風格：'butter' 奶油亮色（原本的）、'crystal' 水晶深色
+  theme: 'crystal' as 'butter' | 'crystal',
   name: { 'zh-tw': '你的名字', en: 'Your Name' },
   email: 'hello@example.com',
   socials: [

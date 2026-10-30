@@ -1,0 +1,65 @@
+---
+// 分類篩選按鈕：點了之後只顯示 data-category 相符的項目（目標是 data-filter-grid 裡的子元素）
+interface Props {
+  label: string;
+  allLabel: string;
+  categories: string[];
+  /** 對應的格子容器 id */
+  target: string;
+}
+
+const { label, allLabel, categories, target } = Astro.props;
+---
+
+<div class="filters" role="group" aria-label={label} data-filter-for={target}>
+  <button type="button" class="chip" aria-pressed="true" data-value="">{allLabel}</button>
+  {categories.map((c) => <button type="button" class="chip" aria-pressed="false" data-value={c}>{c}</button>)}
+</div>
+
+<script>
+  for (const bar of document.querySelectorAll<HTMLElement>('[data-filter-for]')) {
+    const grid = document.getElementById(bar.dataset.filterFor!);
+    if (!grid) continue;
+    const buttons = [...bar.querySelectorAll<HTMLButtonElement>('button')];
+    bar.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('button');
+      if (!btn) return;
+      const value = btn.dataset.value;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      for (const item of grid.children as HTMLCollectionOf<HTMLElement>) {
+        item.hidden = !!value && item.dataset.category !== value;
+      }
+    });
+  }
+</script>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: -12px 0 28px;
+  }
+
+  .chip {
+    padding: 0.45em 1em;
+    border: 1.5px solid var(--dash);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    font: 500 0.92rem/1.2 var(--font-body);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .chip:hover {
+    border-color: var(--ink);
+  }
+
+  .chip[aria-pressed='true'] {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+</style>

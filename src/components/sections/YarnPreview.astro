@@ -1,0 +1,114 @@
+---
+// 首頁的編織區：「手作 ◯ 編織」橫幅當標題，下面放最新幾件作品卡片
+import YarnCard from '../YarnCard.astro';
+import { getLocalized } from '../../lib/content';
+import { localePath, t } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+const pieces = (await getLocalized('yarn', lang)).slice(0, 4);
+---
+
+<section id="yarn" class="section yarn-preview">
+  <a class="banner" href={localePath(lang, 'yarn/')}>
+    <span class="word">{tr('banner.left')}</span>
+    <span class="art" aria-hidden="true">
+      <svg viewBox="0 0 120 100">
+        <rect x="14" y="14" width="70" height="78" rx="4" fill="#fff385" transform="rotate(-10 49 53)" />
+        <rect x="36" y="10" width="70" height="78" rx="4" fill="#30c0f0" transform="rotate(8 71 49)" />
+        <circle cx="60" cy="54" r="30" fill="#67b935" stroke="#1c1b18" stroke-width="2.5" />
+        <path d="M33 46c16 6 36 4 52-10M31 60c18 8 40 6 58-10M40 74c14 4 30 0 42-12M52 25c-6 18-4 40 8 58" stroke="#1c1b18" stroke-width="2.5" fill="none" stroke-linecap="round" />
+      </svg>
+    </span>
+    <span class="word">{tr('banner.right')}</span>
+  </a>
+
+  <div class="grid">
+    {pieces.map((entry, i) => <YarnCard entry={entry} lang={lang} index={i} />)}
+  </div>
+
+  <a class="all lc" href={localePath(lang, 'yarn/')}>{tr('banner.btn')} →</a>
+</section>
+
+<style>
+  .yarn-preview {
+    padding-top: 0;
+  }
+
+  /* ---------- 標題橫幅 ---------- */
+  .banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 3vw, 32px);
+    margin-bottom: 20px;
+    padding: clamp(20px, 3.5vw, 36px) 16px;
+    border-radius: var(--radius);
+    background: var(--cream);
+    text-decoration: none;
+  }
+
+  .word {
+    font: 700 clamp(1.8rem, 4.5vw, 2.8rem) / 1 var(--font-display);
+  }
+
+  html:lang(en) .word {
+    text-transform: lowercase;
+  }
+
+  .art svg {
+    display: block;
+    width: clamp(80px, 10vw, 120px);
+    transition: transform 0.3s ease;
+  }
+
+  .banner:hover .art svg {
+    transform: rotate(-4deg) scale(1.05);
+  }
+
+  /* ---------- 作品卡片：桌機四欄、平板與手機兩欄 ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 1199px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 809px) {
+    .grid {
+      gap: 10px;
+    }
+
+    .grid :global(.info p) {
+      display: none;
+    }
+
+    .grid :global(.head) {
+      flex-direction: column;
+      gap: 4px;
+    }
+  }
+
+  .all {
+    display: flex;
+    justify-content: flex-end;
+    padding: 14px 0 0;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .all:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+</style>

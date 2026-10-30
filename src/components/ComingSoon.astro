@@ -11,7 +11,7 @@ interface Props {
 
 const { lang } = Astro.props;
 const tr = t(lang);
-const page = await getPage('crochet-soon', lang);
+const page = await getPage('yarn-soon', lang);
 const { Content } = await render(page);
 ---
 

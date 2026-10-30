@@ -6,7 +6,7 @@ export function t(lang: Lang) {
   return (key: UIKey): string => ui[lang][key] ?? ui[defaultLang][key];
 }
 
-/** 站內連結：自動加上 GitHub Pages 的 base 與語言前綴。path 可以是 'crochet/' 或 '#contact' */
+/** 站內連結：自動加上 GitHub Pages 的 base 與語言前綴。path 可以是 'yarn/' 或 '#contact' */
 export function localePath(lang: Lang, path = '') {
   const prefix = lang === defaultLang ? '' : `/${lang}`;
   return `${base}${prefix}/${path.replace(/^\//, '')}`;

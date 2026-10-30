@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getLocalized, splitId } from '../lib/content';
-import { homeNav } from '../lib/nav';
+import { threeDNav } from '../lib/nav';
 import { assetUrl, localePath, otherLang, t } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -21,7 +21,7 @@ const { title, summary, year, role, client, tags, cover, video } = entry.data;
 // 另一個語言有同名檔案就連過去，沒有就回另一個語言的作品列表
 const other = otherLang(lang);
 const translated = await getEntry('projects', `${other}/${slug}`);
-const alternate = localePath(other, translated ? `projects/${slug}/` : '#projects');
+const alternate = localePath(other, translated ? `projects/${slug}/` : '3d/');
 
 const all = await getLocalized('projects', lang);
 const next = all[(all.findIndex((p) => p.id === entry.id) + 1) % all.length];
@@ -30,12 +30,12 @@ const meta = [
   { label: tr('projects.role'), value: role },
   { label: tr('projects.client'), value: client },
 ].filter((m) => m.value);
-const nav = await homeNav(lang, false);
+const nav = threeDNav(lang, false);
 ---
 
-<BaseLayout lang={lang} title={title} description={summary} alternate={alternate} nav={nav} current="projects">
+<BaseLayout lang={lang} title={title} description={summary} alternate={alternate} nav={nav} current="works">
   <article class="case">
-    <a class="back lc" href={localePath(lang, '#projects')}>← {tr('projects.back')}</a>
+    <a class="back lc" href={localePath(lang, '3d/#works')}>← {tr('projects.back')}</a>
 
     <header class="head">
       <ul class="tags">{tags.map((tag) => <li class="tag">{tag}</li>)}</ul>

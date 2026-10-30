@@ -1,0 +1,271 @@
+/*
+  水晶主題：深色底、玻璃質感、虹彩漸層
+  在 src/config.ts 把 theme 設成 'crystal' 就會套用；改回 'butter' 回到原本的奶油配色
+  配色：#343762 深靛、#4E5AA2 藍紫、#BCB8D5 薰衣草、#7C84AF 灰藍、#DBA3C5 粉紫
+*/
+html[data-theme='crystal'] {
+  --indigo: #343762;
+  --violet: #4e5aa2;
+  --lavender: #bcb8d5;
+  --slate: #7c84af;
+  --pink: #dba3c5;
+  --night: #0c0b18;
+  --holo: linear-gradient(115deg, #dba3c5 0%, #bcb8d5 28%, #a9d9f2 48%, #7c84af 72%, #4e5aa2 100%);
+  /* 按鈕、標籤用淺一點的虹彩，深色字才讀得清楚 */
+  --holo-soft: linear-gradient(115deg, #f0c9df 0%, #d9d5ef 35%, #c2e6f6 65%, #b3b9de 100%);
+  --glass: rgb(188 184 213 / 0.07);
+  --glass-line: rgb(188 184 213 / 0.22);
+
+  /* 把原本的色票換成新配色；元件都是吃這些變數 */
+  --paper: var(--night);
+  --cream: rgb(188 184 213 / 0.08);
+  --sand: rgb(124 132 175 / 0.16);
+  --butter: rgb(188 184 213 / 0.16);
+  --ink: #eceaf6;
+  --muted: #a9a6c8;
+  --sky: var(--lavender);
+  --leaf: var(--pink);
+  --white: #191831;
+  --dash: rgb(188 184 213 / 0.28);
+
+  color-scheme: dark;
+}
+
+/* 背景：黑色裡透出兩團藍紫、粉紫的光 */
+html[data-theme='crystal'] body {
+  background:
+    radial-gradient(60vw 50vw at 85% 0%, rgb(78 90 162 / 0.35), transparent 70%),
+    radial-gradient(50vw 40vw at 0% 100%, rgb(219 163 197 / 0.16), transparent 70%),
+    var(--night);
+  background-attachment: fixed;
+}
+
+/* ---------- 按鈕：虹彩漸層 ---------- */
+html[data-theme='crystal'] .btn {
+  background: var(--ink);
+  color: var(--indigo);
+}
+
+html[data-theme='crystal'] :is(.btn--sky, .btn--butter, .btn--leaf) {
+  background: var(--holo-soft);
+  background-size: 200% 100%;
+  color: var(--night);
+  transition: background-position 0.5s ease, transform 0.18s ease;
+}
+
+html[data-theme='crystal'] .btn--butter {
+  background-position: 100% 0;
+}
+
+html[data-theme='crystal'] :is(.btn--sky, .btn--butter, .btn--leaf):hover {
+  background-position: 60% 0;
+}
+
+/* ---------- 側欄：靛藍玻璃 ---------- */
+html[data-theme='crystal'] .side {
+  border: 1px solid var(--glass-line);
+  background:
+    radial-gradient(120% 60% at 0% 0%, rgb(219 163 197 / 0.25), transparent 60%),
+    linear-gradient(165deg, var(--violet), var(--indigo) 65%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.15), 0 20px 50px rgb(0 0 0 / 0.35);
+}
+
+html[data-theme='crystal'] .side .nav > li {
+  border: 1px solid rgb(188 184 213 / 0.18);
+  background: rgb(188 184 213 / 0.12);
+}
+
+html[data-theme='crystal'] .side .nav > li.open {
+  background: rgb(12 11 24 / 0.55);
+}
+
+html[data-theme='crystal'] .side .num {
+  background: rgb(188 184 213 / 0.2);
+}
+
+html[data-theme='crystal'] .side .open .num {
+  background: var(--holo-soft);
+  color: var(--night);
+}
+
+html[data-theme='crystal'] .side .cta {
+  color: var(--ink);
+}
+
+html[data-theme='crystal'] .side .foot {
+  background: rgb(12 11 24 / 0.45);
+}
+
+html[data-theme='crystal'] .side .menu-toggle {
+  background: rgb(12 11 24 / 0.5);
+}
+
+/* ---------- 標誌與大標題裡的圓形 ---------- */
+
+html[data-theme='crystal'] .orb.cube {
+  background: conic-gradient(from 200deg, #dba3c5, #bcb8d5, #a9d9f2, #7c84af, #4e5aa2, #dba3c5);
+  box-shadow: 0 0 0.25em rgb(169 217 242 / 0.35);
+}
+
+html[data-theme='crystal'] .orb.yarn {
+  background: radial-gradient(circle at 35% 30%, #f3d3e6, var(--pink) 45%, var(--slate));
+  box-shadow: 0 0 0.25em rgb(219 163 197 / 0.4);
+}
+
+html[data-theme='crystal'] .orb.since {
+  border-color: var(--lavender);
+  background: rgb(188 184 213 / 0.08);
+  color: var(--lavender);
+}
+
+/* 大標題微微發光 */
+html[data-theme='crystal'] .headline .big,
+html[data-theme='crystal'] .headline .row {
+  text-shadow: 0 0 0.35em rgb(124 132 175 / 0.35);
+}
+
+/* 強調字改成虹彩漸層 */
+html[data-theme='crystal'] .statement em,
+html[data-theme='crystal'] .subtitle {
+  background: var(--holo);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- 作品 ---------- */
+html[data-theme='crystal'] .media .placeholder,
+html[data-theme='crystal'] .hero-media .placeholder {
+  background:
+    radial-gradient(circle at 70% 30%, rgb(255 255 255 / 0.45), transparent 22%),
+    radial-gradient(circle at 25% 75%, rgb(219 163 197 / 0.8), transparent 45%),
+    linear-gradient(150deg, #a9d9f2, var(--slate) 40%, var(--violet) 70%, var(--indigo));
+}
+
+html[data-theme='crystal'] .featured,
+html[data-theme='crystal'] .hero-media {
+  box-shadow: 0 0 0 1px var(--glass-line), 0 30px 60px rgb(0 0 0 / 0.35);
+}
+
+html[data-theme='crystal'] .thumb,
+html[data-theme='crystal'] .preview {
+  background: var(--holo) !important;
+}
+
+html[data-theme='crystal'] .label {
+  background: var(--holo-soft);
+  color: var(--night);
+}
+
+html[data-theme='crystal'] .banner {
+  border: 1px solid var(--glass-line);
+  background:
+    radial-gradient(60% 120% at 50% 100%, rgb(78 90 162 / 0.45), transparent 70%),
+    var(--glass);
+}
+
+html[data-theme='crystal'] .banner rect:first-of-type { fill: var(--pink); }
+html[data-theme='crystal'] .banner rect:last-of-type { fill: var(--slate); }
+html[data-theme='crystal'] .banner circle { fill: var(--lavender); }
+
+/* ---------- 卡片：玻璃 ---------- */
+html[data-theme='crystal'] .card {
+  border: 1px solid var(--glass-line);
+  background: var(--glass);
+  backdrop-filter: blur(8px);
+}
+
+html[data-theme='crystal'] .card:hover {
+  border-color: rgb(188 184 213 / 0.55);
+  box-shadow: 0 0 30px rgb(124 132 175 / 0.25);
+}
+
+html[data-theme='crystal'] .stickers span {
+  border-color: rgb(255 255 255 / 0.3);
+}
+
+html[data-theme='crystal'] .stickers span:first-child { background: var(--lavender) !important; }
+html[data-theme='crystal'] .stickers span:last-child { background: var(--pink) !important; }
+
+html[data-theme='crystal'] .piece .media {
+  background: radial-gradient(circle at 50% 40%, rgb(219 163 197 / 0.25), rgb(52 55 98 / 0.4)) !important;
+}
+
+html[data-theme='crystal'] .steps .num {
+  background: var(--holo-soft) !important;
+  color: var(--night);
+}
+
+/* 深色卡片（準備好開始了嗎、即將推出、頁尾）：改成發光的靛藍玻璃 */
+html[data-theme='crystal'] :is(.ready, .soon, .footer) {
+  border: 1px solid var(--glass-line);
+  background:
+    radial-gradient(80% 120% at 100% 0%, rgb(219 163 197 / 0.28), transparent 60%),
+    linear-gradient(160deg, var(--violet), var(--indigo));
+  color: var(--ink);
+}
+
+html[data-theme='crystal'] .ready-text,
+html[data-theme='crystal'] .soon .body,
+html[data-theme='crystal'] .footer .row {
+  color: rgb(236 234 246 / 0.8);
+}
+
+html[data-theme='crystal'] .ready-link {
+  color: var(--pink);
+}
+
+html[data-theme='crystal'] .soon .tag,
+html[data-theme='crystal'] .footer .btn {
+  background: var(--holo-soft);
+  color: var(--night);
+}
+
+/* ---------- 關於、聯絡：信紙改成玻璃 ---------- */
+html[data-theme='crystal'] .letter,
+html[data-theme='crystal'] .note {
+  border: 1px solid var(--glass-line);
+  background: rgb(25 24 49 / 0.85);
+  backdrop-filter: blur(10px);
+}
+
+html[data-theme='crystal'] .letter-wrap::before {
+  background: linear-gradient(160deg, rgb(219 163 197 / 0.25), rgb(78 90 162 / 0.35));
+}
+
+html[data-theme='crystal'] .photo {
+  border-color: #2a2950;
+}
+
+html[data-theme='crystal'] .envelope::before {
+  background: rgb(78 90 162 / 0.25);
+}
+
+html[data-theme='crystal'] .pocket {
+  background:
+    linear-gradient(to top right, #2b2d55 50%, transparent 50.5%) left / 50.5% 100% no-repeat,
+    linear-gradient(to top left, #2b2d55 50%, transparent 50.5%) right / 50.5% 100% no-repeat;
+}
+
+html[data-theme='crystal'] .pocket::after {
+  background: #2b2d55;
+}
+
+html[data-theme='crystal'] select option {
+  background: var(--night);
+}
+
+html[data-theme='crystal'] .madlibs input::placeholder {
+  color: rgb(188 184 213 / 0.45);
+}
+
+/* 編織作品的狀態標籤 */
+html[data-theme='crystal'] .piece .tag.available {
+  background: var(--holo-soft);
+  color: var(--night);
+}
+
+html[data-theme='crystal'] .piece .tag.sold {
+  background: rgb(188 184 213 / 0.1);
+  color: var(--muted);
+}

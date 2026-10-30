@@ -1,7 +1,7 @@
 import { getCollection, getEntry } from 'astro:content';
 import type { Lang } from '../i18n/ui';
 
-type Localized = 'projects' | 'services' | 'crochet';
+type Localized = 'projects' | 'services' | 'yarn';
 
 /** collection 的 id 長得像 "zh-tw/bold-coach"，拆成語言與 slug */
 export function splitId(id: string) {

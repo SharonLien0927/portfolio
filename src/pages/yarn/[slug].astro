@@ -1,0 +1,13 @@
+---
+import YarnPieceView from '../../views/YarnPieceView.astro';
+import { getLocalized, splitId } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getLocalized('yarn', 'zh-tw');
+  return entries.map((e) => ({ params: { slug: splitId(e.id).slug } }));
+}
+
+const { slug } = Astro.params;
+---
+
+<YarnPieceView lang="zh-tw" slug={slug} />
