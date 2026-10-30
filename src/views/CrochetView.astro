@@ -1,10 +1,12 @@
 ---
 import { render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sections/Hero.astro';
 import CrochetCard from '../components/CrochetCard.astro';
 import ProcessSteps from '../components/ProcessSteps.astro';
 import ComingSoon from '../components/ComingSoon.astro';
 import { getLocalized, getPage } from '../lib/content';
+import { crochetNav } from '../lib/nav';
 import { localePath, otherLang, t } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -16,91 +18,70 @@ const { lang } = Astro.props;
 const tr = t(lang);
 const intro = await getPage('crochet-intro', lang);
 const process = await getPage('crochet-process', lang);
-const { Content: Intro } = await render(intro);
 const { Content: ProcessIntro } = await render(process);
 const pieces = await getLocalized('crochet', lang);
 ---
 
-<BaseLayout lang={lang} title={tr('nav.crochet')} description={intro.data.title} alternate={localePath(otherLang(lang), 'crochet/')}>
-  <section class="intro container">
-    {intro.data.eyebrow && <p class="eyebrow">{intro.data.eyebrow}</p>}
-    <h1>{intro.data.title}</h1>
-    <div class="lead muted"><Intro /></div>
-    <div class="ctas">
-      <a class="btn btn--leaf" href={localePath(lang, '#contact')}>{tr('crochet.cta')} <span class="arrow">→</span></a>
-      <a class="btn" href="#process">{tr('crochet.process')}</a>
+<BaseLayout
+  lang={lang}
+  title={tr('nav.crochet')}
+  description={intro.data.title}
+  alternate={localePath(otherLang(lang), 'crochet/')}
+  nav={crochetNav(lang)}
+>
+  <Hero lang={lang} page={intro}>
+    <a class="btn btn--leaf lc" href={localePath(lang, '#contact')}>{tr('crochet.cta')} →</a>
+    <a class="btn btn--butter lc" href="#process">{tr('nav.process')}</a>
+  </Hero>
+
+  <section id="works" class="section works">
+    <h2 class="h2">{tr('crochet.works')}</h2>
+    <div class="grid">
+      {pieces.map((entry, i) => <CrochetCard entry={entry} lang={lang} index={i} />)}
     </div>
   </section>
 
-  <section class="section works">
-    <div class="container">
-      <div class="section-head">
-        <h2 class="h2">{tr('crochet.works')}</h2>
-      </div>
-      <div class="grid">
-        {pieces.map((entry) => <CrochetCard entry={entry} lang={lang} />)}
-      </div>
-    </div>
+  <section id="process" class="section">
+    <h2 class="h2">{process.data.title}</h2>
+    <div class="process-intro muted"><ProcessIntro /></div>
+    {process.data.steps && <ProcessSteps steps={process.data.steps} />}
   </section>
 
-  <section id="process" class="section section--sand">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">{tr('crochet.process')}</p>
-          <h2 class="h2">{process.data.title}</h2>
-        </div>
-        <div class="process-intro muted"><ProcessIntro /></div>
-      </div>
-      {process.data.steps && <ProcessSteps steps={process.data.steps} />}
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <ComingSoon lang={lang} />
-    </div>
+  <section id="soon" class="section soon">
+    <ComingSoon lang={lang} />
   </section>
 </BaseLayout>
 
 <style>
-  .intro {
-    padding-block: clamp(56px, 10vw, 120px) 24px;
-  }
-
-  h1 {
-    max-width: 14ch;
-    font-size: clamp(3rem, 8vw, 6.5rem);
-  }
-
-  .lead {
-    max-width: 50ch;
-    margin-top: 24px;
-    font-size: 1.2rem;
-  }
-
-  .ctas {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-top: 28px;
-  }
-
   .works {
-    padding-top: clamp(48px, 6vw, 80px);
+    padding-top: 0;
   }
 
+  /* 桌機三欄、平板兩欄、手機一欄 */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 32px 24px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 1199px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 809px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   .process-intro {
-    max-width: 40ch;
+    margin: -28px auto 32px;
+    text-align: center;
   }
 
-  .process-intro :global(p:last-child) {
-    margin-bottom: 0;
+  .soon {
+    padding-bottom: 0;
   }
 </style>

@@ -47,13 +47,23 @@ const crochet = defineCollection({
 // 各區塊的文案（hero、about、contact、crochet-intro、crochet-process、crochet-soon）
 const pages = defineCollection({
   loader: mdx('pages'),
-  schema: z.object({
-    title: z.string(),
-    eyebrow: z.string().optional(),
-    lines: z.array(z.string()).optional(),
-    stats: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
-    steps: z.array(z.object({ title: z.string(), text: z.string() })).optional(),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      eyebrow: z.string().optional(),
+      // 大標題分三行；{cube}、{yarn}、{since} 會變成圓形圖示
+      lines: z.array(z.string()).optional(),
+      since: z.string().optional(),
+      // About：置中的大字宣言，*星號* 包起來的字會變藍色
+      statement: z.string().optional(),
+      subtitle: z.string().optional(),
+      quote: z.string().optional(),
+      signature: z.string().optional(),
+      points: z.array(z.string()).optional(),
+      photo: image().optional(),
+      stats: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
+      steps: z.array(z.object({ title: z.string(), text: z.string() })).optional(),
+    }),
 });
 
 export const collections = { projects, services, crochet, pages };

@@ -1,4 +1,4 @@
-// 作品卡 hover 時才載入並播放影片；觸控裝置改成捲進畫面時自動播放
+// 精選作品 hover 時才載入並播放影片；觸控裝置改成捲進畫面時自動播放
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canHover = matchMedia('(hover: hover)').matches;
 

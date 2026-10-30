@@ -1,7 +1,7 @@
 ---
-import ProjectCard from '../ProjectCard.astro';
-import { getLocalized } from '../../lib/content';
-import { t } from '../../i18n/utils';
+import { Image } from 'astro:assets';
+import { splitId, getLocalized } from '../../lib/content';
+import { assetUrl, localePath, t } from '../../i18n/utils';
 import type { Lang } from '../../i18n/ui';
 
 interface Props {
@@ -11,52 +11,356 @@ interface Props {
 const { lang } = Astro.props;
 const tr = t(lang);
 const projects = await getLocalized('projects', lang);
+const [featured, ...rest] = projects;
+const href = (id: string) => localePath(lang, `projects/${splitId(id).slug}/`);
+const tints = ['#30c0f0', '#67b935', '#fff385', '#fbefc7'];
 ---
 
-<section id="projects" class="section">
-  <div class="container">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow">{tr('projects.eyebrow')}</p>
-        <h2 class="h2">{tr('projects.title')}</h2>
-      </div>
-      <p class="count muted">{String(projects.length).padStart(2, '0')}</p>
-    </div>
-    <div class="grid">
-      {projects.map((entry, i) => <ProjectCard entry={entry} lang={lang} index={i} />)}
-    </div>
+<section id="projects" class="section projects">
+  {
+    featured && (
+      <a class="featured" href={href(featured.id)} data-hover-video>
+        <div class="media" style={`--tint: ${tints[0]}`}>
+          {featured.data.cover ? (
+            <Image src={featured.data.cover} alt="" widths={[800, 1200, 1600]} sizes="(min-width: 1000px) 70vw, 100vw" />
+          ) : (
+            <div class="placeholder" aria-hidden="true" />
+          )}
+          {featured.data.video && (
+            <video muted loop playsinline preload="none" data-src={assetUrl(featured.data.video)} aria-hidden="true" />
+          )}
+        </div>
+        <span class="tag label">{tr('projects.featured')}</span>
+        <div class="caption">
+          <h2>{featured.data.title}</h2>
+          <p>{featured.data.tags.join(', ')}</p>
+          <p class="year">{featured.data.year}</p>
+        </div>
+      </a>
+    )
+  }
+
+  <ul class="list" data-preview-list>
+    {
+      rest.map((p, i) => (
+        <li>
+          <a
+            class="row"
+            href={href(p.id)}
+            data-video={p.data.video ? assetUrl(p.data.video) : undefined}
+            data-image={p.data.cover?.src}
+            style={`--tint: ${tints[(i + 1) % tints.length]}`}
+          >
+            <span class="thumb">
+              {p.data.cover ? <Image src={p.data.cover} alt="" width={160} /> : <span class="placeholder" />}
+            </span>
+            <strong class="title">{p.data.title}</strong>
+            <span class="cat muted">{p.data.tags.join(', ')}</span>
+            <span class="year">{p.data.year}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <!-- 滑鼠移到列表上時跟著游標的預覽小窗 -->
+  <div class="preview" aria-hidden="true" data-preview>
+    <img alt="" />
+    <video muted loop playsinline></video>
   </div>
+
+  <a class="banner" href={localePath(lang, 'crochet/')}>
+    <span class="word">{tr('banner.left')}</span>
+    <span class="art" aria-hidden="true">
+      <svg viewBox="0 0 120 100">
+        <rect x="14" y="14" width="70" height="78" rx="4" fill="#fff385" transform="rotate(-10 49 53)" />
+        <rect x="36" y="10" width="70" height="78" rx="4" fill="#30c0f0" transform="rotate(8 71 49)" />
+        <circle cx="60" cy="54" r="30" fill="#67b935" stroke="#1c1b18" stroke-width="2.5" />
+        <path d="M33 46c16 6 36 4 52-10M31 60c18 8 40 6 58-10M40 74c14 4 30 0 42-12M52 25c-6 18-4 40 8 58" stroke="#1c1b18" stroke-width="2.5" fill="none" stroke-linecap="round" />
+      </svg>
+      <span class="btn">{tr('banner.btn')}</span>
+    </span>
+    <span class="word">{tr('banner.right')}</span>
+  </a>
 </section>
 
 <script>
   import '../../scripts/hover-video.ts';
+
+  // 列表 hover 預覽：只在有滑鼠的裝置上啟用
+  const list = document.querySelector<HTMLElement>('[data-preview-list]');
+  const preview = document.querySelector<HTMLElement>('[data-preview]');
+  if (list && preview && matchMedia('(hover: hover)').matches) {
+    const img = preview.querySelector('img')!;
+    const video = preview.querySelector('video')!;
+
+    list.addEventListener('pointermove', (e) => {
+      preview.style.transform = `translate(${e.clientX + 24}px, ${e.clientY - 80}px)`;
+    });
+
+    list.querySelectorAll<HTMLAnchorElement>('.row').forEach((row) => {
+      row.addEventListener('pointerenter', () => {
+        const { video: src, image } = row.dataset;
+        preview.style.setProperty('--tint', row.style.getPropertyValue('--tint'));
+        img.hidden = !image;
+        if (image) img.src = image;
+        if (src) {
+          video.src = src;
+          video.play().catch(() => {});
+        } else {
+          video.removeAttribute('src');
+        }
+        preview.classList.add('show');
+      });
+      row.addEventListener('pointerleave', () => {
+        preview.classList.remove('show');
+        video.pause();
+      });
+    });
+  }
 </script>
 
 <style>
-  .count {
+  .projects {
+    padding-top: 0;
+  }
+
+  /* ---------- 精選作品 ---------- */
+  .featured {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius);
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .media {
+    position: relative;
+    aspect-ratio: 16 / 8;
+    background: var(--tint);
+  }
+
+  .media img,
+  .media video,
+  .media .placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .media video {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .media :global(video.playing) {
+    opacity: 1;
+  }
+
+  .media .placeholder {
+    background:
+      radial-gradient(circle at 70% 35%, rgb(255 255 255 / 0.55), transparent 30%),
+      radial-gradient(circle at 25% 80%, var(--leaf), transparent 45%),
+      linear-gradient(160deg, var(--sky), #1d8fc0);
+  }
+
+  .media::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0 0;
+    background: linear-gradient(transparent, rgb(28 27 24 / 0.55));
+  }
+
+  .label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    color: var(--ink);
+  }
+
+  html:lang(en) .label {
+    text-transform: lowercase;
+  }
+
+  .caption {
+    position: absolute;
+    right: 20px;
+    bottom: 16px;
+    left: 20px;
+    z-index: 1;
+  }
+
+  .caption h2 {
+    font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+    font-weight: 600;
+  }
+
+  .caption p {
+    margin: 2px 0 0;
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+
+  .caption .year {
+    margin-top: 12px;
+  }
+
+  .featured img {
+    transition: transform 0.6s ease;
+  }
+
+  .featured:hover img {
+    transform: scale(1.03);
+  }
+
+  /* ---------- 作品列表 ---------- */
+  .list {
     margin: 0;
-    font: 700 clamp(2.5rem, 6vw, 4.5rem) / 1 var(--font-display);
-    opacity: 0.35;
+    padding: 0;
+    list-style: none;
   }
 
-  .grid {
+  .row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(32px, 5vw, 56px) clamp(20px, 3vw, 40px);
+    grid-template-columns: 70px minmax(0, 1.3fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+    border-bottom: 1.5px dashed var(--dash);
+    text-decoration: none;
+    transition: background 0.2s, padding 0.2s;
   }
 
-  /* 錯落排列，打破死板的格線 */
-  .grid > :global(:nth-child(even)) {
-    margin-top: clamp(0px, 8vw, 96px);
+  .row:hover {
+    padding-inline: 10px;
+    background: var(--cream);
   }
 
-  @media (max-width: 720px) {
-    .grid {
-      grid-template-columns: 1fr;
+  .thumb {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    border-radius: 4px;
+    background: var(--tint);
+  }
+
+  .thumb :global(img),
+  .thumb .placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .title {
+    font: 600 1.05rem/1.3 var(--font-display);
+  }
+
+  .cat {
+    font-size: 0.85rem;
+  }
+
+  .row .year {
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 40;
+    width: 240px;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--tint, var(--sky));
+    box-shadow: 0 12px 30px rgb(28 27 24 / 0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .preview.show {
+    opacity: 1;
+  }
+
+  .preview :is(img, video) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .preview video:not([src]) {
+    display: none;
+  }
+
+  /* ---------- 鉤織橫幅 ---------- */
+  .banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 3vw, 32px);
+    margin-top: clamp(32px, 5vw, 56px);
+    padding: clamp(28px, 5vw, 48px) 16px;
+    border-radius: var(--radius);
+    background: var(--cream);
+    text-decoration: none;
+  }
+
+  .word {
+    font: 700 clamp(1.8rem, 4.5vw, 2.8rem) / 1 var(--font-display);
+  }
+
+  html:lang(en) .word {
+    text-transform: lowercase;
+  }
+
+  .art {
+    position: relative;
+    display: grid;
+    justify-items: center;
+  }
+
+  .art svg {
+    width: clamp(100px, 14vw, 150px);
+    transition: transform 0.3s ease;
+  }
+
+  .banner:hover .art svg {
+    transform: rotate(-4deg) scale(1.05);
+  }
+
+  .art .btn {
+    margin-top: -18px;
+    white-space: nowrap;
+  }
+
+  html:lang(en) .art .btn {
+    text-transform: lowercase;
+  }
+
+  @media (max-width: 809px) {
+    .media {
+      aspect-ratio: 4 / 3;
     }
 
-    .grid > :global(:nth-child(even)) {
-      margin-top: 0;
+    .row {
+      grid-template-columns: 60px 1fr auto;
+      gap: 12px;
+    }
+
+    .cat {
+      display: none;
+    }
+
+    .banner {
+      flex-direction: column;
     }
   }
 </style>

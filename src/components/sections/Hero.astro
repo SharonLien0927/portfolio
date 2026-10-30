@@ -1,193 +1,135 @@
 ---
-import { render } from 'astro:content';
-import { getPage } from '../../lib/content';
-import { localePath, t } from '../../i18n/utils';
+import { render, type CollectionEntry } from 'astro:content';
+import BigLines from '../BigLines.astro';
+import { t } from '../../i18n/utils';
 import type { Lang } from '../../i18n/ui';
 
 interface Props {
   lang: Lang;
+  page: CollectionEntry<'pages'>;
 }
 
-const { lang } = Astro.props;
-const tr = t(lang);
-const page = await getPage('hero', lang);
+const { lang, page } = Astro.props;
 const { Content } = await render(page);
-const lines = page.data.lines ?? [page.data.title];
+const [l1 = page.data.title, l2 = '', l3 = ''] = page.data.lines ?? [];
+const since = page.data.since;
+const sinceLabel = t(lang)('since');
 ---
 
-<section class="hero container">
-  <div class="copy">
-    {page.data.eyebrow && <p class="badge"><span class="pulse" aria-hidden="true"></span>{page.data.eyebrow}</p>}
-    <h1>
-      <span class="visually-hidden">{page.data.title}</span>
-      <span aria-hidden="true">{lines.map((line) => <span class="line">{line}</span>)}</span>
-    </h1>
-    <div class="lead muted"><Content /></div>
-    <div class="ctas">
-      <a class="btn btn--sky" href={localePath(lang, '#projects')}>
-        <span class="chip cube" aria-hidden="true"></span>{tr('hero.cta3d')} <span class="arrow">→</span>
-      </a>
-      <a class="btn btn--leaf" href={localePath(lang, 'crochet/')}>
-        <span class="chip yarn" aria-hidden="true"></span>{tr('hero.ctaCrochet')} <span class="arrow">→</span>
-      </a>
+<section class="hero">
+  <h1 class="visually-hidden">{page.data.title}</h1>
+  <div class="headline">
+    <div class="row" aria-hidden="true"><span class="big"><BigLines text={l1} since={since} sinceLabel={sinceLabel} /></span></div>
+    <div class="row r2">
+      <div class="lead"><Content /></div>
+      <span class="big" aria-hidden="true"><BigLines text={l2} since={since} sinceLabel={sinceLabel} /></span>
     </div>
-  </div>
-
-  <!-- 3D 線框方塊 × 毛線球：兩條路線的視覺符號 -->
-  <div class="art" aria-hidden="true">
-    <svg class="cube-art" viewBox="0 0 200 200">
-      <path class="face top" d="M100 20 170 60 100 100 30 60Z" />
-      <path class="face left" d="M30 60 100 100v80L30 140Z" />
-      <path class="face right" d="M170 60 100 100v80l70-40Z" />
-      <path class="wire" d="M100 20v0M30 60v80M170 60v80M100 100v80" />
-    </svg>
-    <svg class="yarn-art" viewBox="0 0 200 200">
-      <circle cx="100" cy="100" r="78" />
-      <path d="M36 70c40 14 90 10 128-22M26 104c46 18 104 14 148-24M38 140c40 12 86 6 122-26M78 26c-14 46-10 104 22 150M120 24c-20 50-16 112 18 152" />
-      <path class="tail" d="M168 140c18 10 24 30 8 44" />
-    </svg>
+    <div class="row r3">
+      <span class="big" aria-hidden="true"><BigLines text={l3} since={since} sinceLabel={sinceLabel} /></span>
+      <div class="ctas"><slot /></div>
+    </div>
   </div>
 </section>
 
 <style>
   .hero {
     display: grid;
-    grid-template-columns: 1.35fr 1fr;
+    place-items: center;
+    min-height: clamp(420px, 62svh, 640px);
+    padding-block: 40px;
+  }
+
+  /* 字級跟著主欄寬度（cqi）縮放：大螢幕更大、平板自動換行 */
+  .headline {
+    display: grid;
+    justify-items: center;
+    gap: 0.1em;
+    font: 700 max(2.6rem, 10.5cqi) / 0.95 var(--font-display);
+    letter-spacing: -0.02em;
+    text-align: center;
+  }
+
+  /* 中文字是滿版方塊，同字級看起來比英文大，縮一點 */
+  :lang(zh-Hant-TW) .headline {
+    font-size: max(2.4rem, 8.6cqi);
+    letter-spacing: 0.02em;
+  }
+
+  html:lang(en) .big {
+    text-transform: lowercase;
+  }
+
+  .row {
+    display: flex;
     align-items: center;
-    gap: 40px;
-    min-height: calc(100svh - 90px);
-    padding-block: 56px 80px;
-  }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0.35em 1em;
-    border: 1.5px solid var(--ink);
-    border-radius: 999px;
-    background: var(--paper);
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  .pulse {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--leaf);
-    box-shadow: 0 0 0 0 rgb(103 185 53 / 0.6);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    70% { box-shadow: 0 0 0 10px rgb(103 185 53 / 0); }
-    100% { box-shadow: 0 0 0 0 rgb(103 185 53 / 0); }
-  }
-
-  h1 {
-    margin: 12px 0 28px;
-    font-size: clamp(3rem, 9vw, 7.5rem);
-    line-height: 0.95;
-  }
-
-  .line {
-    display: block;
-  }
-
-  .line:nth-child(2) {
-    width: fit-content;
-    padding-inline: 0.12em;
-    border-radius: 0.2em;
-    background: var(--butter);
-    transform: rotate(-1.5deg);
-  }
-
-  .line:nth-child(3) {
-    color: var(--muted);
-  }
-
-  :lang(zh-Hant-TW) h1 {
-    line-height: 1.12;
+    gap: 0.3em;
   }
 
   .lead {
-    max-width: 46ch;
-    font-size: 1.15rem;
+    flex-shrink: 0;
+    max-width: 23em;
+    font: 400 clamp(0.85rem, 1.15cqi, 1.05rem) / 1.45 var(--font-body);
+    letter-spacing: 0;
+    text-align: right;
+    color: var(--muted);
+  }
+
+  .lead :global(p) {
+    margin: 0;
   }
 
   .ctas {
     display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-top: 28px;
+    flex-shrink: 0;
+    flex-direction: column;
+    gap: 8px;
+    font-size: clamp(0.95rem, 1.3cqi, 1.2rem);
+    letter-spacing: 0;
   }
 
-  .ctas .btn {
-    padding: 1em 1.6em;
-    font-size: 1.1rem;
+  .ctas :global(.btn) {
+    justify-content: center;
+    padding: 0.85em 1.4em;
+    font-size: inherit;
   }
 
-  .chip {
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--ink);
-    background: var(--paper);
-  }
-
-  .chip.cube { transform: rotate(45deg); }
-  .chip.yarn { border-radius: 50%; }
-
-  .art {
-    position: relative;
-    aspect-ratio: 1;
-  }
-
-  .art svg {
-    position: absolute;
-    stroke: var(--ink);
-    stroke-width: 3;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-  }
-
-  .cube-art {
-    top: 0;
-    left: 0;
-    width: 62%;
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .face.top { fill: var(--paper); }
-  .face.left { fill: var(--sky); }
-  .face.right { fill: #7fd6f5; }
-  .wire { fill: none; }
-
-  .yarn-art {
-    right: 0;
-    bottom: 0;
-    width: 66%;
-    animation: float 7s ease-in-out infinite reverse;
-  }
-
-  .yarn-art circle { fill: var(--leaf); }
-  .yarn-art path { fill: none; }
-
-  @keyframes float {
-    50% { transform: translateY(-12px) rotate(3deg); }
-  }
-
-  @media (max-width: 860px) {
-    .hero {
-      grid-template-columns: 1fr;
-      min-height: auto;
-      padding-top: 40px;
+  /* 平板：主欄比較窄，字級比例放大一點 */
+  @media (min-width: 810px) and (max-width: 1199px) {
+    .headline {
+      font-size: 13cqi;
     }
 
-    .art {
-      order: -1;
-      width: min(260px, 70%);
-      margin-inline: auto;
+    :lang(zh-Hant-TW) .headline {
+      font-size: 11cqi;
+    }
+  }
+
+  /* 手機：每段字各自一行、字放大，簡介夾在中間，按鈕放最下面 */
+  @media (max-width: 809px) {
+    .hero {
+      min-height: auto;
+      padding-block: 48px 56px;
+    }
+
+    .headline,
+    :lang(zh-Hant-TW) .headline {
+      font-size: max(2.4rem, 17cqi);
+      gap: 0.06em;
+    }
+
+    .row {
+      flex-direction: column;
+      gap: 0.06em;
+    }
+
+    .r2 .lead {
+      max-width: 19em;
+      margin: 0.3em 0 0.2em auto;
+    }
+
+    .ctas {
+      flex-direction: row;
+      margin-top: 0.5em;
     }
   }
 </style>

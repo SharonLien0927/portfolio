@@ -1,5 +1,6 @@
 ---
 import ServiceCard from '../ServiceCard.astro';
+import Logo from '../Logo.astro';
 import { getLocalized } from '../../lib/content';
 import { t } from '../../i18n/utils';
 import type { Lang } from '../../i18n/ui';
@@ -12,58 +13,70 @@ const { lang } = Astro.props;
 const tr = t(lang);
 const services = await getLocalized('services', lang);
 const groups = [
-  { key: 'digital', label: tr('services.digital'), en: 'Digital' },
-  { key: 'handmade', label: tr('services.handmade'), en: 'Handmade' },
+  { key: 'digital', label: tr('services.digital') },
+  { key: 'handmade', label: tr('services.handmade') },
 ] as const;
 ---
 
-<section id="services" class="section section--sand">
-  <div class="container">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow">{tr('services.eyebrow')}</p>
-        <h2 class="h2">{tr('services.title')}</h2>
-      </div>
-    </div>
-
-    {
-      groups.map((g) => {
-        const items = services.filter((s) => s.data.group === g.key);
-        return (
-          <div class="group" data-group={g.key}>
-            <h3 class="group-title">
+<section id="services" class="section">
+  <div class="wrap">
+    <h2 class="h2">{tr('services.title')}</h2>
+    <div class="columns">
+      {
+        groups.map((g, gi) => (
+          <div class="col" data-group={g.key}>
+            <p class="group lc">
               <span class="dot" aria-hidden="true" />
-              {lang === 'en' ? g.en : `${g.en} ${g.label}`}
-            </h3>
-            <div class="cards">
-              {items.map((entry, i) => (
-                <ServiceCard entry={entry} index={i} />
+              {g.label}
+            </p>
+            {services
+              .filter((s) => s.data.group === g.key)
+              .map((entry, i) => (
+                <ServiceCard entry={entry} index={i + gi} />
               ))}
-            </div>
+            {gi === groups.length - 1 && (
+              <a class="ready" href="#contact">
+                <Logo size={22} />
+                <span class="ready-text lc">{tr('services.ready')}</span>
+                <span class="ready-link lc">{tr('services.readyBtn')} →</span>
+              </a>
+            )}
           </div>
-        );
-      })
-    }
+        ))
+      }
+    </div>
   </div>
 </section>
 
 <style>
-  .group + .group {
-    margin-top: clamp(40px, 6vw, 72px);
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: 16px;
   }
 
-  .group-title {
+  /* 右欄往下錯開，做出交錯的節奏 */
+  .col {
+    display: grid;
+    gap: 16px;
+  }
+
+  .col + .col {
+    margin-top: 64px;
+  }
+
+  .group {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+    gap: 8px;
+    margin: 0;
+    font: 600 1rem/1 var(--font-display);
   }
 
   .dot {
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--ink);
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     background: var(--sky);
   }
@@ -72,9 +85,40 @@ const groups = [
     background: var(--leaf);
   }
 
-  .cards {
+  .ready {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
+    gap: 14px;
+    min-height: 190px;
+    align-content: start;
+    padding: 20px;
+    border-radius: var(--radius);
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+  }
+
+  .ready-text {
+    font: 600 clamp(1.4rem, 2.6vw, 1.75rem) / 1.15 var(--font-display);
+    color: rgb(255 253 234 / 0.85);
+  }
+
+  .ready-link {
+    align-self: end;
+    color: var(--butter);
+    font-weight: 500;
+  }
+
+  .ready:hover .ready-text {
+    color: var(--paper);
+  }
+
+  @media (max-width: 809px) {
+    .columns {
+      grid-template-columns: 1fr;
+    }
+
+    .col + .col {
+      margin-top: 16px;
+    }
   }
 </style>

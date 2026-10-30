@@ -8,59 +8,82 @@ interface Props {
 
 const { entry, index } = Astro.props;
 const { Content } = await render(entry);
+const digital = entry.data.group === 'digital';
+// 小貼紙的顏色組合，依序輪替
+const pairs = [
+  ['#30c0f0', '#fff385'],
+  ['#67b935', '#fbefc7'],
+  ['#fff385', '#30c0f0'],
+];
+const [a, b] = pairs[index % pairs.length];
 ---
 
-<article class="service" data-group={entry.data.group}>
-  <span class="num">{String(index + 1).padStart(2, '0')}</span>
+<article class="service card">
+  <div class="stickers" aria-hidden="true">
+    <span style={`background:${a}`}>
+      {
+        digital ? (
+          <svg viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z" fill="none" stroke="#1c1b18" stroke-width="1.8" stroke-linejoin="round" /><path d="M12 12l8-4.5M12 12 4 7.5M12 12v9" stroke="#1c1b18" stroke-width="1.8" /></svg>
+        ) : (
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1c1b18" stroke-width="1.8" /><path d="M5 10c4 2 9 1 13-3M5 14c5 2 10 1 14-3M9 4c-2 5-1 11 3 16" stroke="#1c1b18" stroke-width="1.6" fill="none" stroke-linecap="round" /></svg>
+        )
+      }
+    </span>
+    <span style={`background:${b}`}></span>
+  </div>
   <h3>{entry.data.title}</h3>
   <div class="body muted"><Content /></div>
-  {entry.data.tags.length > 0 && <ul class="tags">{entry.data.tags.map((tag) => <li>{tag}</li>)}</ul>}
+  {entry.data.tags.length > 0 && <ul class="tags">{entry.data.tags.map((tag) => <li class="tag">{tag}</li>)}</ul>}
 </article>
 
 <style>
   .service {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    height: 100%;
-    padding: 28px;
-    border: 2px solid var(--ink);
-    border-radius: var(--radius-lg);
-    background: var(--paper);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: grid;
+    gap: 10px;
+    padding: 18px 18px 20px;
+    transition: border-color 0.2s, transform 0.2s;
   }
 
   .service:hover {
-    transform: translateY(-4px) rotate(-0.4deg);
-    box-shadow: 0 8px 0 var(--accent);
+    border-color: var(--ink);
+    transform: translateY(-3px);
   }
 
-  [data-group='digital'] { --accent: var(--sky); }
-  [data-group='handmade'] {
-    --accent: var(--leaf);
-    border-style: dashed;
+  .stickers {
+    display: flex;
+    margin-bottom: 4px;
   }
 
-  .num {
+  .stickers span {
     display: grid;
     place-items: center;
-    width: 44px;
-    height: 44px;
-    border: 2px solid var(--ink);
-    border-radius: 50%;
-    background: var(--accent);
-    font: 700 0.95rem/1 var(--font-display);
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--white);
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgb(28 27 24 / 0.15);
+    transform: rotate(-8deg);
+  }
+
+  .stickers span + span {
+    margin-left: -8px;
+    transform: rotate(10deg) translateY(3px);
+  }
+
+  .stickers svg {
+    width: 20px;
   }
 
   h3 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+  }
+
+  .body {
+    font-size: 0.92rem;
   }
 
   .body :global(p:last-child) {
     margin-bottom: 0;
-  }
-
-  .tags {
-    margin-top: auto;
   }
 </style>

@@ -4,13 +4,16 @@ interface Props {
 }
 
 const { steps } = Astro.props;
+const colors = ['var(--sky)', 'var(--butter)', 'var(--leaf)', 'var(--sand)'];
 ---
 
 <ol class="steps" style={`--n: ${steps.length}`}>
   {
     steps.map((step, i) => (
-      <li>
-        <span class="num">{i + 1}</span>
+      <li class="card">
+        <span class="num" style={`background:${colors[i % colors.length]}`}>
+          {String(i + 1).padStart(2, '0')}
+        </span>
         <h3>{step.title}</h3>
         <p class="muted">{step.text}</p>
       </li>
@@ -22,7 +25,7 @@ const { steps } = Astro.props;
   .steps {
     display: grid;
     grid-template-columns: repeat(var(--n), 1fr);
-    gap: 20px;
+    gap: 28px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -30,58 +33,68 @@ const { steps } = Astro.props;
 
   li {
     position: relative;
-    padding: 28px 24px 24px;
-    border: 2px dashed var(--ink);
-    border-radius: var(--radius-lg);
-    background: var(--paper);
+    padding: 16px 16px 18px;
   }
 
-  /* 卡片之間的「縫線」 */
+  /* 步驟之間的箭頭 */
   li:not(:last-child)::after {
-    content: '';
+    content: '›';
     position: absolute;
-    top: 50px;
-    right: -22px;
-    width: 24px;
-    border-top: 2px dashed var(--ink);
+    top: 50%;
+    right: -20px;
+    color: var(--muted);
+    font-size: 1.4rem;
+    line-height: 0;
   }
 
   .num {
-    display: grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    margin-bottom: 16px;
-    border: 2px solid var(--ink);
-    border-radius: 50%;
-    background: var(--leaf);
-    font: 700 1.2rem/1 var(--font-display);
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 0.15em 0.55em;
+    border-radius: 4px;
+    font: 600 0.8rem/1.4 var(--font-body);
   }
 
   h3 {
-    margin-bottom: 8px;
-    font-size: 1.3rem;
+    margin-bottom: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
   }
 
   p {
     margin: 0;
+    font-size: 0.9rem;
   }
 
-  /* 窄螢幕改直排，縫線改成上下連接 */
-  @media (max-width: 860px) {
+  /* 平板：兩欄、不顯示箭頭 */
+  @media (max-width: 1199px) {
     .steps {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
     }
 
     li:not(:last-child)::after {
+      display: none;
+    }
+  }
+
+  /* 手機：一欄，箭頭改成往下 */
+  @media (max-width: 809px) {
+    .steps {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    li:not(:last-child)::after {
+      display: block;
+    }
+
+    li:not(:last-child)::after {
+      content: '⌄';
       top: auto;
       right: auto;
-      bottom: -22px;
-      left: 47px;
-      width: 0;
-      height: 24px;
-      border-top: 0;
-      border-left: 2px dashed var(--ink);
+      bottom: -10px;
+      left: 50%;
     }
   }
 </style>

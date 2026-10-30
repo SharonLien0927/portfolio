@@ -1,23 +1,29 @@
 /* ---------- 配色與字型（換風格只要改這一段） ---------- */
 :root {
-  --cream: #fff5d4;   /* 頁面底色 */
-  --paper: #fffdea;   /* 卡片 */
-  --sand: #fbefc7;    /* 交錯區塊底色 */
-  --butter: #fff385;  /* 標籤、強調 */
-  --ink: #1c1b18;     /* 主要文字 */
+  --paper: #fffdea;   /* 頁面底色 */
+  --cream: #fff5d4;   /* 橫幅、區塊底色 */
+  --sand: #fbefc7;    /* 信封、第二層底色 */
+  --butter: #fff385;  /* 導覽、標籤 */
+  --ink: #1c1b18;     /* 主要文字、深色卡片 */
   --muted: #675e50;   /* 次要文字 */
-  --sky: #30c0f0;     /* 數位 / 3D */
-  --leaf: #67b935;    /* 手作 / 鉤織 */
-  --line: rgb(28 27 24 / 0.14);
+  --sky: #30c0f0;     /* 側欄、強調 */
+  --leaf: #67b935;    /* 狀態點、手作 */
+  --white: #ffffff;
+  --dash: rgb(28 27 24 / 0.28);
 
   --font-display: 'Bricolage Grotesque Variable', 'Noto Sans TC Variable', system-ui, sans-serif;
   --font-body: 'Be Vietnam Pro', 'Noto Sans TC Variable', system-ui, sans-serif;
 
-  --radius-lg: 28px;
-  --radius-md: 18px;
-  --gutter: clamp(16px, 4vw, 48px);
-  --maxw: 1200px;
-  --shadow: 0 4px 0 var(--ink);
+  --radius: 6px;
+  --gap: 20px;
+  --side-w: 260px;
+}
+
+/* 斷點：手機 < 810、平板 810–1199、桌機 ≥ 1200（跟參考網站一樣） */
+@media (min-width: 1200px) {
+  :root {
+    --side-w: 360px;
+  }
 }
 
 *,
@@ -28,16 +34,16 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 96px;
+  scroll-padding-top: 24px;
 }
 
 body {
   margin: 0;
-  background: var(--cream);
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 1.0625rem;
-  line-height: 1.7;
+  font-size: 1rem;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -58,13 +64,12 @@ h3 {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
-:lang(zh-Hant-TW) :is(h1, h2, h3) {
-  letter-spacing: 0;
-  line-height: 1.2;
+/* 英文版標題與導覽走小寫風格 */
+html:lang(en) :is(h1, h2, h3, .lc) {
+  text-transform: lowercase;
 }
 
 p {
@@ -72,95 +77,53 @@ p {
 }
 
 :focus-visible {
-  outline: 3px solid var(--sky);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
 
-/* ---------- 版面 ---------- */
-.container {
-  width: min(100% - 2 * var(--gutter), var(--maxw));
-  margin-inline: auto;
+/* ---------- 版面：左側欄 + 主內容 ---------- */
+.shell {
+  display: grid;
+  grid-template-columns: var(--side-w) minmax(0, 1fr);
+  gap: var(--gap);
+  padding: var(--gap);
+}
+
+/* 主內容是 container，裡面的大標題用 cqi 跟著主欄寬度縮放 */
+.main {
+  min-width: 0;
+  container-type: inline-size;
 }
 
 .section {
-  padding-block: clamp(72px, 10vw, 140px);
+  padding-block: clamp(56px, 8vw, 110px);
 }
 
-.section--sand {
-  background: var(--sand);
-}
-
-.section-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  justify-content: space-between;
-  gap: 16px 32px;
-  margin-bottom: clamp(32px, 5vw, 56px);
+.wrap {
+  max-width: 1000px;
+  margin-inline: auto;
 }
 
 .h2 {
-  font-size: clamp(2.2rem, 5.5vw, 4.25rem);
-}
-
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  margin-bottom: 18px;
-  padding: 0.3em 0.9em;
-  border-radius: 999px;
-  background: var(--butter);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  margin-bottom: clamp(28px, 4vw, 48px);
+  font-size: clamp(2rem, 4vw, 2.625rem);
+  text-align: center;
 }
 
 .muted {
   color: var(--muted);
 }
 
-/* ---------- 按鈕：粗框 + 底部實心陰影 ---------- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6em;
-  padding: 0.85em 1.5em;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  background: var(--paper);
-  box-shadow: var(--shadow);
-  color: var(--ink);
-  font: 600 1rem/1.2 var(--font-body);
-  text-decoration: none;
-  cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+.tag {
+  display: inline-block;
+  padding: 0.1em 0.5em;
+  border-radius: 4px;
+  background: var(--butter);
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 var(--ink);
-}
-
-.btn:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--ink);
-}
-
-.btn--sky { background: var(--sky); }
-.btn--leaf { background: var(--leaf); }
-.btn--ink { background: var(--ink); color: var(--paper); box-shadow: 0 4px 0 var(--muted); }
-
-.btn .arrow {
-  transition: transform 0.18s ease;
-}
-
-.btn:hover .arrow {
-  transform: translateX(3px);
-}
-
-/* ---------- 標籤 ---------- */
 .tags {
   display: flex;
   flex-wrap: wrap;
@@ -170,19 +133,36 @@ p {
   list-style: none;
 }
 
-.tags li {
-  padding: 0.15em 0.75em;
-  border: 1.5px solid var(--ink);
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 500;
+.card {
+  border: 1.5px dashed var(--dash);
+  border-radius: var(--radius);
+  background: var(--paper);
 }
 
-/* ---------- 手作感虛線（鉤織的「針目」） ---------- */
-.stitch {
-  border: 2px dashed var(--ink);
-  border-radius: var(--radius-lg);
+/* ---------- 按鈕 ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.7em 1.15em;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--paper);
+  font: 500 0.95rem/1.2 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s ease, filter 0.18s ease;
 }
+
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.btn--butter { background: var(--butter); color: var(--ink); }
+.btn--sky { background: var(--sky); color: var(--ink); }
+.btn--leaf { background: var(--leaf); color: var(--ink); }
 
 /* ---------- MDX 內文 ---------- */
 .prose {
@@ -191,17 +171,29 @@ p {
 
 .prose h2 {
   margin: 2em 0 0.6em;
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
 .prose h3 {
   margin: 1.6em 0 0.5em;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
 }
 
 .prose img {
   margin-block: 1.5em;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
+}
+
+.prose blockquote {
+  margin: 1.5em 0;
+  padding: 14px 18px;
+  border: 1.5px dashed var(--dash);
+  border-radius: var(--radius);
+  background: var(--cream);
+}
+
+.prose blockquote p:last-child {
+  margin: 0;
 }
 
 .prose a {
@@ -217,6 +209,17 @@ p {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+@media (max-width: 809px) {
+  .shell {
+    grid-template-columns: 1fr;
+    padding: 12px 16px 16px;
+  }
+
+  html {
+    scroll-padding-top: 88px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

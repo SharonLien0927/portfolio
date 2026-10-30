@@ -21,12 +21,17 @@ const tr = t(lang);
 >
   <p class="sentence">
     {tr('form.hi')}
-    <label>
+    <label class="blank wide">
       <span class="visually-hidden">{tr('form.name')}</span>
-      <input name="name" required autocomplete="name" placeholder={tr('form.name')} size="8" />
+      <input name="name" required autocomplete="name" placeholder={tr('form.name')} />
+    </label>
+    {tr('form.mail')}
+    <label class="blank wide">
+      <span class="visually-hidden">{tr('form.emailPh')}</span>
+      <input name="email" type="email" required autocomplete="email" placeholder={tr('form.emailPh')} />
     </label>
     {tr('form.want')}
-    <label>
+    <label class="blank">
       <span class="visually-hidden">{tr('form.want')}</span>
       <select name="topic">
         <option>{tr('form.topic.3d')}</option>
@@ -35,7 +40,7 @@ const tr = t(lang);
       </select>
     </label>
     {tr('form.budget')}
-    <label>
+    <label class="blank">
       <span class="visually-hidden">{tr('form.budget')}</span>
       <select name="budget">
         <option>{tr('form.budget.s')}</option>
@@ -45,17 +50,11 @@ const tr = t(lang);
       </select>
     </label>
     {tr('form.when')}
-    <label>
+    <label class="blank">
       <span class="visually-hidden">{tr('form.whenPh')}</span>
-      <input name="timeline" placeholder={tr('form.whenPh')} size="7" />
+      <input name="timeline" placeholder={tr('form.whenPh')} />
     </label>
     {tr('form.whenEnd')}
-    {tr('form.reach')}
-    <label>
-      <span class="visually-hidden">{tr('form.emailPh')}</span>
-      <input name="email" type="email" required autocomplete="email" placeholder={tr('form.emailPh')} size="14" />
-    </label>
-    {tr('form.reachEnd')}
   </p>
 
   <label class="more">
@@ -67,20 +66,13 @@ const tr = t(lang);
   <input type="checkbox" name="botcheck" class="visually-hidden" tabindex="-1" autocomplete="off" />
 
   <div class="actions">
-    <button class="btn btn--ink" type="submit">{tr('form.send')} <span class="arrow">→</span></button>
+    <button class="btn lc" type="submit">{tr('form.send')}</button>
     <p class="status" role="status" aria-live="polite"></p>
   </div>
 </form>
 
 <script>
   for (const form of document.querySelectorAll<HTMLFormElement>('form.madlibs')) {
-    // 輸入框隨內容變寬，維持「填空」的樣子
-    for (const input of form.querySelectorAll<HTMLInputElement>('.sentence input')) {
-      const min = input.size;
-      const fit = () => (input.size = Math.max(min, input.value.length + 1));
-      input.addEventListener('input', fit);
-    }
-
     const status = form.querySelector<HTMLElement>('.status')!;
     const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
     const { key, email, sending, ok, err } = form.dataset;
@@ -120,84 +112,82 @@ const tr = t(lang);
 <style>
   .madlibs {
     display: grid;
-    gap: 28px;
+    gap: 22px;
   }
 
   .sentence {
     margin: 0;
-    font: 500 clamp(1.5rem, 3.6vw, 2.6rem) / 1.75 var(--font-display);
-    letter-spacing: -0.01em;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 2.6;
   }
 
-  .sentence input,
-  .sentence select {
-    max-width: 100%;
-    margin: 0 0.15em;
+  .blank {
+    display: inline-block;
+    min-width: 7em;
+    margin-inline: 0.3em;
+  }
+
+  .blank.wide {
+    min-width: 11em;
+  }
+
+  .blank :is(input, select) {
+    width: 100%;
     padding: 0 0.2em;
     border: 0;
-    border-bottom: 3px dashed var(--ink);
+    border-bottom: 1.5px dashed var(--dash);
     border-radius: 0;
     background: transparent;
     color: var(--ink);
-    font: inherit;
-    font-weight: 700;
-    transition: background 0.15s, border-color 0.15s;
+    font: 500 1rem/1.6 var(--font-body);
   }
 
-  .sentence select {
+  .blank select {
     appearance: none;
-    padding-right: 1.1em;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231c1b18' stroke-width='2'/%3E%3C/svg%3E")
-      right 0.1em center / 0.5em no-repeat;
+    padding-right: 1.2em;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23675e50' stroke-width='1.6'/%3E%3C/svg%3E")
+      right 0.2em center / 0.65em no-repeat;
     cursor: pointer;
   }
 
-  .sentence input::placeholder {
-    color: var(--muted);
-    opacity: 0.6;
-    font-weight: 500;
+  .blank input::placeholder {
+    color: rgb(103 94 80 / 0.45);
   }
 
-  .sentence :is(input, select):focus {
-    border-bottom-style: solid;
+  .blank :is(input, select):focus,
+  textarea:focus {
     border-color: var(--sky);
-    background-color: var(--butter);
+    border-bottom-style: solid;
     outline: none;
   }
 
   .more {
     display: grid;
-    gap: 8px;
-    max-width: 640px;
+    gap: 6px;
     color: var(--muted);
-    font-size: 0.95rem;
   }
 
   textarea {
-    padding: 14px 16px;
-    border: 2px solid var(--ink);
-    border-radius: var(--radius-md);
-    background: var(--paper);
+    padding: 4px 0;
+    border: 0;
+    border-bottom: 1.5px dashed var(--dash);
+    background: transparent;
     color: var(--ink);
     font: inherit;
     resize: vertical;
-  }
-
-  textarea:focus {
-    border-color: var(--sky);
-    outline: none;
   }
 
   .actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
   }
 
   .status {
     margin: 0;
-    font-weight: 500;
+    font-size: 0.9rem;
   }
 
   button:disabled {

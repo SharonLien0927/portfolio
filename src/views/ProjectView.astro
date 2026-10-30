@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getLocalized, splitId } from '../lib/content';
+import { homeNav } from '../lib/nav';
 import { assetUrl, localePath, otherLang, t } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -29,47 +30,50 @@ const meta = [
   { label: tr('projects.role'), value: role },
   { label: tr('projects.client'), value: client },
 ].filter((m) => m.value);
+const nav = await homeNav(lang, false);
 ---
 
-<BaseLayout lang={lang} title={title} description={summary} alternate={alternate}>
-  <article class="container case">
-    <a class="back" href={localePath(lang, '#projects')}>← {tr('projects.back')}</a>
+<BaseLayout lang={lang} title={title} description={summary} alternate={alternate} nav={nav} current="projects">
+  <article class="case">
+    <a class="back lc" href={localePath(lang, '#projects')}>← {tr('projects.back')}</a>
 
     <header class="head">
+      <ul class="tags">{tags.map((tag) => <li class="tag">{tag}</li>)}</ul>
       <h1>{title}</h1>
       <p class="summary muted">{summary}</p>
-      <dl class="meta">
-        {
-          meta.map((m) => (
-            <div>
-              <dt>{m.label}</dt>
-              <dd>{m.value}</dd>
-            </div>
-          ))
-        }
-      </dl>
-      <ul class="tags">{tags.map((tag) => <li>{tag}</li>)}</ul>
     </header>
 
-    {
-      (cover || video) && (
-        <div class="hero-media">
-          {video ? (
-            <video src={assetUrl(video)} poster={cover?.src} autoplay muted loop playsinline />
-          ) : (
-            cover && <Image src={cover} alt="" widths={[800, 1200, 1800]} sizes="100vw" loading="eager" />
-          )}
-        </div>
-      )
-    }
+    <dl class="meta">
+      {
+        meta.map((m) => (
+          <div>
+            <dt class="muted lc">{m.label}</dt>
+            <dd>{m.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <div class="hero-media">
+      {
+        video ? (
+          <video src={assetUrl(video)} poster={cover?.src} autoplay muted loop playsinline />
+        ) : cover ? (
+          <Image src={cover} alt="" widths={[800, 1200, 1800]} sizes="(min-width: 1000px) 70vw, 100vw" loading="eager" />
+        ) : (
+          <div class="placeholder" aria-hidden="true" />
+        )
+      }
+    </div>
 
     <div class="prose content"><Content /></div>
 
     {
       next && next.id !== entry.id && (
         <a class="next" href={localePath(lang, `projects/${splitId(next.id).slug}/`)}>
-          <span class="muted">{tr('projects.next')}</span>
-          <strong>{next.data.title} →</strong>
+          <span class="muted lc">{tr('projects.next')}</span>
+          <strong>{next.data.title}</strong>
+          <span class="arrow" aria-hidden="true">→</span>
         </a>
       )
     }
@@ -78,13 +82,15 @@ const meta = [
 
 <style>
   .case {
-    padding-block: 48px 120px;
+    max-width: 1000px;
+    margin-inline: auto;
+    padding-top: clamp(32px, 6vw, 72px);
   }
 
   .back {
     display: inline-block;
-    margin-bottom: 40px;
-    font-weight: 500;
+    margin-bottom: 32px;
+    font-size: 0.9rem;
     text-decoration: none;
   }
 
@@ -94,39 +100,40 @@ const meta = [
 
   h1 {
     max-width: 18ch;
-    font-size: clamp(2.6rem, 7vw, 5.5rem);
+    margin-top: 14px;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
   }
 
   .summary {
     max-width: 52ch;
-    margin: 20px 0 32px;
-    font-size: 1.25rem;
+    margin: 16px 0 28px;
+    font-size: 1.1rem;
   }
 
   .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 40px;
-    margin: 0 0 20px;
-    padding: 20px 0;
-    border-block: 2px solid var(--ink);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    margin: 0;
+    border-block: 1.5px dashed var(--dash);
+  }
+
+  .meta div {
+    padding: 12px 0;
   }
 
   dt {
-    color: var(--muted);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 
   dd {
     margin: 0;
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .hero-media {
-    margin-block: 48px;
+    margin-block: 32px;
     overflow: hidden;
-    border: 2px solid var(--ink);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius);
   }
 
   .hero-media :is(img, video) {
@@ -134,29 +141,48 @@ const meta = [
     height: auto;
   }
 
+  .placeholder {
+    aspect-ratio: 16 / 8;
+    background:
+      radial-gradient(circle at 70% 35%, rgb(255 255 255 / 0.55), transparent 30%),
+      radial-gradient(circle at 25% 80%, var(--leaf), transparent 45%),
+      linear-gradient(160deg, var(--sky), #1d8fc0);
+  }
+
   .content {
-    margin-top: 48px;
-    font-size: 1.1rem;
+    margin-top: 40px;
   }
 
   .next {
     display: grid;
-    gap: 6px;
-    margin-top: 96px;
-    padding: 32px;
-    border: 2px solid var(--ink);
-    border-radius: var(--radius-lg);
-    background: var(--paper);
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 4px 16px;
+    margin-top: 72px;
+    padding: 20px 0;
+    border-block: 1.5px dashed var(--dash);
     text-decoration: none;
-    transition: box-shadow 0.2s, transform 0.2s;
-  }
-
-  .next strong {
-    font: 700 clamp(1.6rem, 4vw, 2.6rem) / 1.1 var(--font-display);
+    transition: padding 0.2s, background 0.2s;
   }
 
   .next:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 0 var(--sky);
+    padding-inline: 12px;
+    background: var(--cream);
+  }
+
+  .next .muted {
+    grid-column: 1;
+    font-size: 0.85rem;
+  }
+
+  .next strong {
+    grid-column: 1;
+    font: 600 clamp(1.4rem, 3vw, 2rem) / 1.2 var(--font-display);
+  }
+
+  .arrow {
+    grid-row: 1 / 3;
+    grid-column: 2;
+    font-size: 1.6rem;
   }
 </style>

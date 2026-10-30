@@ -2,11 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/sections/Hero.astro';
 import Projects from '../components/sections/Projects.astro';
-import Services from '../components/sections/Services.astro';
 import About from '../components/sections/About.astro';
+import Services from '../components/sections/Services.astro';
 import Contact from '../components/sections/Contact.astro';
 import { getPage } from '../lib/content';
-import { localePath, otherLang } from '../i18n/utils';
+import { homeNav } from '../lib/nav';
+import { localePath, otherLang, t } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
 interface Props {
@@ -14,13 +15,19 @@ interface Props {
 }
 
 const { lang } = Astro.props;
+const tr = t(lang);
 const hero = await getPage('hero', lang);
+const about = await getPage('about', lang);
+const nav = await homeNav(lang, true);
 ---
 
-<BaseLayout lang={lang} description={hero.data.title} alternate={localePath(otherLang(lang))}>
-  <Hero lang={lang} />
+<BaseLayout lang={lang} description={hero.data.title} alternate={localePath(otherLang(lang))} nav={nav}>
+  <Hero lang={lang} page={hero}>
+    <a class="btn btn--sky lc" href="#projects">{tr('hero.cta3d')} →</a>
+    <a class="btn btn--butter lc" href={localePath(lang, 'crochet/')}>{tr('hero.ctaCrochet')} →</a>
+  </Hero>
   <Projects lang={lang} />
+  <About page={about} />
   <Services lang={lang} />
-  <About lang={lang} />
   <Contact lang={lang} />
 </BaseLayout>

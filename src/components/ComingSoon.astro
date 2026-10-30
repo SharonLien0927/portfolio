@@ -1,5 +1,6 @@
 ---
 import { render } from 'astro:content';
+import Logo from './Logo.astro';
 import { getPage } from '../lib/content';
 import { localePath, t } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
@@ -14,63 +15,49 @@ const page = await getPage('crochet-soon', lang);
 const { Content } = await render(page);
 ---
 
-<div class="soon stitch">
-  <span class="badge">{tr('soon.badge')}</span>
-  <h2 class="h2">{page.data.title}</h2>
-  <div class="body muted"><Content /></div>
-  <a class="btn btn--leaf" href={localePath(lang, '#contact')}>{tr('soon.cta')} <span class="arrow">→</span></a>
-  <svg class="hook" viewBox="0 0 40 200" aria-hidden="true">
-    <path d="M20 196V40c0-14-14-14-14-24S14 4 22 4s12 6 12 12" />
-  </svg>
+<div class="soon">
+  <div class="head">
+    <Logo size={22} />
+    <span class="tag lc">{tr('soon.badge')}</span>
+  </div>
+  <h2>{page.data.title}</h2>
+  <div class="body"><Content /></div>
+  <a class="btn btn--butter lc" href={localePath(lang, '#contact')}>{tr('soon.cta')} →</a>
 </div>
 
 <style>
   .soon {
-    position: relative;
     display: grid;
     justify-items: start;
     gap: 16px;
-    padding: clamp(32px, 6vw, 72px);
-    overflow: hidden;
+    padding: clamp(24px, 5vw, 48px);
+    border-radius: var(--radius);
     background:
-      repeating-linear-gradient(-45deg, transparent 0 22px, rgb(255 243 133 / 0.5) 22px 24px),
-      var(--paper);
+      repeating-linear-gradient(-45deg, transparent 0 18px, rgb(255 253 234 / 0.04) 18px 20px),
+      var(--ink);
+    color: var(--paper);
   }
 
-  .badge {
-    padding: 0.3em 0.9em;
-    border: 2px solid var(--ink);
-    border-radius: 999px;
-    background: var(--butter);
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tag {
+    color: var(--ink);
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
   }
 
   .body {
     max-width: 52ch;
+    color: rgb(255 253 234 / 0.75);
   }
 
   .body :global(p:last-child) {
     margin-bottom: 0;
-  }
-
-  .hook {
-    position: absolute;
-    right: clamp(16px, 6vw, 80px);
-    bottom: -20px;
-    width: clamp(28px, 4vw, 44px);
-    fill: none;
-    stroke: var(--sky);
-    stroke-width: 8;
-    stroke-linecap: round;
-    transform: rotate(18deg);
-  }
-
-  @media (max-width: 640px) {
-    .hook {
-      display: none;
-    }
   }
 </style>

@@ -1,0 +1,77 @@
+---
+import LangSwitch from './LangSwitch.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  alternate: string;
+  status?: string;
+  since?: string;
+}
+
+const { lang, alternate, status, since } = Astro.props;
+---
+
+<div class="topbar">
+  {status ? <p class="status"><span class="dot" aria-hidden="true"></span>{status}</p> : <span></span>}
+  <div class="right">
+    {since && <span class="chip">est.{since} <span aria-hidden="true">→</span> ∞</span>}
+    <span class="chip lang"><LangSwitch lang={lang} alternate={alternate} /></span>
+  </div>
+</div>
+
+<style>
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 34px;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--leaf);
+    box-shadow: 0 0 0 0 rgb(103 185 53 / 0.6);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    70% { box-shadow: 0 0 0 8px rgb(103 185 53 / 0); }
+    100% { box-shadow: 0 0 0 0 rgb(103 185 53 / 0); }
+  }
+
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chip {
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--cream);
+    font-size: 0.85rem;
+  }
+
+  .chip.lang {
+    padding: 2px;
+    background: var(--white);
+  }
+
+  @media (max-width: 809px) {
+    .chip.lang {
+      display: none;
+    }
+  }
+</style>

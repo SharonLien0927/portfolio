@@ -7,40 +7,54 @@ import type { Lang } from '../i18n/ui';
 interface Props {
   entry: CollectionEntry<'crochet'>;
   lang: Lang;
+  index: number;
 }
 
-const { entry, lang } = Astro.props;
+const { entry, lang, index } = Astro.props;
 const { title, summary, status, cover } = entry.data;
+const tints = ['#fff5d4', '#e3f6fd', '#eef7e7', '#fff9c2'];
 ---
 
-<article class="piece">
-  <div class="media">
+<article class="piece card">
+  <div class="media" style={`background:${tints[index % tints.length]}`}>
     {
       cover ? (
-        <Image src={cover} alt={title} widths={[400, 700]} sizes="(min-width: 900px) 33vw, 100vw" />
+        <Image src={cover} alt={title} widths={[400, 700]} sizes="(min-width: 1000px) 25vw, 100vw" />
       ) : (
         <svg class="yarn" viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r="38" />
-          <path d="M18 38c20 6 44 4 64-10M14 56c24 8 52 6 72-14M22 74c18 4 40 0 56-16M40 13c-6 22-4 50 10 75" />
+          <circle cx="50" cy="50" r="34" />
+          <path d="M20 40c18 6 40 4 60-10M17 56c22 8 46 6 66-12M25 72c16 4 36 0 50-14M42 17c-6 20-4 46 10 68" />
         </svg>
       )
     }
-    <span class:list={['status', status]}>{t(lang)(`crochet.status.${status}`)}</span>
   </div>
-  <h3>{title}</h3>
-  <p class="muted">{summary}</p>
+  <div class="info">
+    <div class="head">
+      <h3>{title}</h3>
+      <span class:list={['tag', status]}>{t(lang)(`crochet.status.${status}`)}</span>
+    </div>
+    <p class="muted">{summary}</p>
+  </div>
 </article>
 
 <style>
+  .piece {
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .piece:hover {
+    border-color: var(--ink);
+    transform: translateY(-3px);
+  }
+
   .media {
-    position: relative;
     display: grid;
     place-items: center;
     aspect-ratio: 1;
+    margin: 6px;
     overflow: hidden;
-    border: 2px dashed var(--ink);
-    border-radius: 50% 50% var(--radius-lg) var(--radius-lg);
-    background: var(--sand);
+    border-radius: 4px;
   }
 
   .media img {
@@ -50,34 +64,47 @@ const { title, summary, status, cover } = entry.data;
   }
 
   .yarn {
-    width: 55%;
+    width: 52%;
     fill: var(--leaf);
     stroke: var(--ink);
     stroke-width: 2.5;
     stroke-linecap: round;
+    transition: transform 0.4s ease;
+  }
+
+  .piece:hover .yarn {
+    transform: rotate(-12deg);
   }
 
   .yarn path {
     fill: none;
   }
 
-  .status {
-    position: absolute;
-    top: 50%;
-    left: 12px;
-    padding: 0.2em 0.8em;
-    border: 1.5px solid var(--ink);
-    border-radius: 999px;
-    background: var(--butter);
-    font-size: 0.8rem;
+  .info {
+    padding: 6px 14px 14px;
+  }
+
+  .head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  h3 {
+    font-size: 1.05rem;
     font-weight: 600;
   }
 
-  .status.available { background: var(--leaf); }
-  .status.sold { background: var(--paper); color: var(--muted); }
+  .tag {
+    flex-shrink: 0;
+  }
 
-  h3 {
-    margin: 16px 0 4px;
-    font-size: 1.35rem;
+  .tag.available { background: #cdeab8; }
+  .tag.sold { background: var(--sand); color: var(--muted); }
+
+  p {
+    margin: 6px 0 0;
+    font-size: 0.88rem;
   }
 </style>

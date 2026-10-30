@@ -5,10 +5,13 @@ import '@fontsource/be-vietnam-pro/500.css';
 import '@fontsource/be-vietnam-pro/600.css';
 import '@fontsource-variable/noto-sans-tc';
 import '../styles/global.css';
-import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
+import TopBar from '../components/TopBar.astro';
 import Footer from '../components/Footer.astro';
+import type { NavItem } from '../lib/nav';
+import { getPage } from '../lib/content';
 import { htmlLang, type Lang } from '../i18n/ui';
-import { otherLang } from '../i18n/utils';
+import { localePath, otherLang } from '../i18n/utils';
 import { site } from '../config';
 
 interface Props {
@@ -17,12 +20,16 @@ interface Props {
   description?: string;
   /** 另一個語言的對應網址（語言切換鈕用） */
   alternate: string;
+  nav: NavItem[];
+  current?: string;
 }
 
-const { lang, title, description = '', alternate } = Astro.props;
+const { lang, title, description = '', alternate, nav, current } = Astro.props;
+const hero = await getPage('hero', lang);
 const fullTitle = title ? `${title} — ${site.name[lang]}` : site.name[lang];
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const alternateHref = new URL(alternate, Astro.site);
+const contactHref = nav.find((i) => i.id === 'contact')?.href ?? localePath(lang, '#contact');
 ---
 
 <!doctype html>
@@ -38,13 +45,16 @@ const alternateHref = new URL(alternate, Astro.site);
     <link rel="alternate" hreflang={htmlLang[otherLang(lang)]} href={alternateHref} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta name="theme-color" content="#fff5d4" />
+    <meta name="theme-color" content="#30c0f0" />
   </head>
   <body>
-    <Header lang={lang} alternate={alternate} />
-    <main id="main">
-      <slot />
-    </main>
-    <Footer lang={lang} />
+    <div class="shell">
+      <Sidebar lang={lang} alternate={alternate} items={nav} current={current} />
+      <main class="main" id="main">
+        <TopBar lang={lang} alternate={alternate} status={hero.data.eyebrow} since={hero.data.since} />
+        <slot />
+        <Footer lang={lang} contactHref={contactHref} />
+      </main>
+    </div>
   </body>
 </html>

@@ -27,25 +27,23 @@ const { lang, alternate } = Astro.props;
 <style>
   .switch {
     display: inline-flex;
-    padding: 3px;
-    border: 1.5px solid var(--ink);
-    border-radius: 999px;
-    font-size: 0.85rem;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.75rem;
     font-weight: 600;
   }
 
   .opt {
-    padding: 0.25em 0.7em;
-    border-radius: 999px;
+    padding: 0.15em 0.5em;
+    border-radius: 4px;
     text-decoration: none;
   }
 
   .active {
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--butter);
   }
 
   a.opt:hover {
-    background: var(--butter);
+    background: var(--cream);
   }
 </style>
