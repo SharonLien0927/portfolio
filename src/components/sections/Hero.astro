@@ -129,6 +129,7 @@ const below = page.data.leadPosition === 'below';
   /* --gutter：兩行之間的上下距離 = 最後一行跟按鈕的左右距離，視覺上一致 */
   .stair {
     justify-items: start;
+    font-size: max(2.6rem, 9cqi);
     gap: var(--gutter);
     --step: 1.1em;
     --gutter: 0.3em;
@@ -210,7 +211,8 @@ const below = page.data.leadPosition === 'below';
       margin-top: 0.5em;
     }
 
-    /* 手機的階梯：字小一點、行距拉開，左右留白；按鈕移到最下面 */
+    /* 手機的階梯（中英文共用）：字小一點、行距拉開，左右留白；按鈕移到最下面 */
+    .stair,
     :lang(zh-Hant-TW) .stair {
       font-size: 13cqi;
       gap: 0.2em;
