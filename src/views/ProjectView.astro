@@ -1,0 +1,162 @@
+---
+import { Image } from 'astro:assets';
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getLocalized, splitId } from '../lib/content';
+import { assetUrl, localePath, otherLang, t } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  slug: string;
+}
+
+const { lang, slug } = Astro.props;
+const tr = t(lang);
+const entry = (await getEntry('projects', `${lang}/${slug}`))!;
+const { Content } = await render(entry);
+const { title, summary, year, role, client, tags, cover, video } = entry.data;
+
+// 另一個語言有同名檔案就連過去，沒有就回另一個語言的作品列表
+const other = otherLang(lang);
+const translated = await getEntry('projects', `${other}/${slug}`);
+const alternate = localePath(other, translated ? `projects/${slug}/` : '#projects');
+
+const all = await getLocalized('projects', lang);
+const next = all[(all.findIndex((p) => p.id === entry.id) + 1) % all.length];
+const meta = [
+  { label: tr('projects.year'), value: String(year) },
+  { label: tr('projects.role'), value: role },
+  { label: tr('projects.client'), value: client },
+].filter((m) => m.value);
+---
+
+<BaseLayout lang={lang} title={title} description={summary} alternate={alternate}>
+  <article class="container case">
+    <a class="back" href={localePath(lang, '#projects')}>← {tr('projects.back')}</a>
+
+    <header class="head">
+      <h1>{title}</h1>
+      <p class="summary muted">{summary}</p>
+      <dl class="meta">
+        {
+          meta.map((m) => (
+            <div>
+              <dt>{m.label}</dt>
+              <dd>{m.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <ul class="tags">{tags.map((tag) => <li>{tag}</li>)}</ul>
+    </header>
+
+    {
+      (cover || video) && (
+        <div class="hero-media">
+          {video ? (
+            <video src={assetUrl(video)} poster={cover?.src} autoplay muted loop playsinline />
+          ) : (
+            cover && <Image src={cover} alt="" widths={[800, 1200, 1800]} sizes="100vw" loading="eager" />
+          )}
+        </div>
+      )
+    }
+
+    <div class="prose content"><Content /></div>
+
+    {
+      next && next.id !== entry.id && (
+        <a class="next" href={localePath(lang, `projects/${splitId(next.id).slug}/`)}>
+          <span class="muted">{tr('projects.next')}</span>
+          <strong>{next.data.title} →</strong>
+        </a>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .case {
+    padding-block: 48px 120px;
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 40px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .back:hover {
+    text-decoration: underline;
+  }
+
+  h1 {
+    max-width: 18ch;
+    font-size: clamp(2.6rem, 7vw, 5.5rem);
+  }
+
+  .summary {
+    max-width: 52ch;
+    margin: 20px 0 32px;
+    font-size: 1.25rem;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 40px;
+    margin: 0 0 20px;
+    padding: 20px 0;
+    border-block: 2px solid var(--ink);
+  }
+
+  dt {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .hero-media {
+    margin-block: 48px;
+    overflow: hidden;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-lg);
+  }
+
+  .hero-media :is(img, video) {
+    width: 100%;
+    height: auto;
+  }
+
+  .content {
+    margin-top: 48px;
+    font-size: 1.1rem;
+  }
+
+  .next {
+    display: grid;
+    gap: 6px;
+    margin-top: 96px;
+    padding: 32px;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-lg);
+    background: var(--paper);
+    text-decoration: none;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  .next strong {
+    font: 700 clamp(1.6rem, 4vw, 2.6rem) / 1.1 var(--font-display);
+  }
+
+  .next:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 0 var(--sky);
+  }
+</style>

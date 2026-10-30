@@ -1,0 +1,50 @@
+---
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource/be-vietnam-pro/400.css';
+import '@fontsource/be-vietnam-pro/500.css';
+import '@fontsource/be-vietnam-pro/600.css';
+import '@fontsource-variable/noto-sans-tc';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { htmlLang, type Lang } from '../i18n/ui';
+import { otherLang } from '../i18n/utils';
+import { site } from '../config';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  /** 另一個語言的對應網址（語言切換鈕用） */
+  alternate: string;
+}
+
+const { lang, title, description = '', alternate } = Astro.props;
+const fullTitle = title ? `${title} — ${site.name[lang]}` : site.name[lang];
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const alternateHref = new URL(alternate, Astro.site);
+---
+
+<!doctype html>
+<html lang={htmlLang[lang]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={htmlLang[lang]} href={canonical} />
+    <link rel="alternate" hreflang={htmlLang[otherLang(lang)]} href={alternateHref} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta name="theme-color" content="#fff5d4" />
+  </head>
+  <body>
+    <Header lang={lang} alternate={alternate} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>

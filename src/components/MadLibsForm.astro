@@ -1,0 +1,207 @@
+---
+import { t } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+import { site } from '../config';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+---
+
+<form
+  class="madlibs"
+  data-key={site.web3formsKey}
+  data-email={site.email}
+  data-sending={tr('form.sending')}
+  data-ok={tr('form.ok')}
+  data-err={tr('form.err')}
+>
+  <p class="sentence">
+    {tr('form.hi')}
+    <label>
+      <span class="visually-hidden">{tr('form.name')}</span>
+      <input name="name" required autocomplete="name" placeholder={tr('form.name')} size="8" />
+    </label>
+    {tr('form.want')}
+    <label>
+      <span class="visually-hidden">{tr('form.want')}</span>
+      <select name="topic">
+        <option>{tr('form.topic.3d')}</option>
+        <option>{tr('form.topic.crochet')}</option>
+        <option>{tr('form.topic.other')}</option>
+      </select>
+    </label>
+    {tr('form.budget')}
+    <label>
+      <span class="visually-hidden">{tr('form.budget')}</span>
+      <select name="budget">
+        <option>{tr('form.budget.s')}</option>
+        <option>{tr('form.budget.m')}</option>
+        <option>{tr('form.budget.l')}</option>
+        <option selected>{tr('form.budget.x')}</option>
+      </select>
+    </label>
+    {tr('form.when')}
+    <label>
+      <span class="visually-hidden">{tr('form.whenPh')}</span>
+      <input name="timeline" placeholder={tr('form.whenPh')} size="7" />
+    </label>
+    {tr('form.whenEnd')}
+    {tr('form.reach')}
+    <label>
+      <span class="visually-hidden">{tr('form.emailPh')}</span>
+      <input name="email" type="email" required autocomplete="email" placeholder={tr('form.emailPh')} size="14" />
+    </label>
+    {tr('form.reachEnd')}
+  </p>
+
+  <label class="more">
+    <span>{tr('form.more')}</span>
+    <textarea name="message" rows="3"></textarea>
+  </label>
+
+  <!-- 防垃圾信：真人看不到這欄 -->
+  <input type="checkbox" name="botcheck" class="visually-hidden" tabindex="-1" autocomplete="off" />
+
+  <div class="actions">
+    <button class="btn btn--ink" type="submit">{tr('form.send')} <span class="arrow">→</span></button>
+    <p class="status" role="status" aria-live="polite"></p>
+  </div>
+</form>
+
+<script>
+  for (const form of document.querySelectorAll<HTMLFormElement>('form.madlibs')) {
+    // 輸入框隨內容變寬，維持「填空」的樣子
+    for (const input of form.querySelectorAll<HTMLInputElement>('.sentence input')) {
+      const min = input.size;
+      const fit = () => (input.size = Math.max(min, input.value.length + 1));
+      input.addEventListener('input', fit);
+    }
+
+    const status = form.querySelector<HTMLElement>('.status')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    const { key, email, sending, ok, err } = form.dataset;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+      const subject = `[Portfolio] ${data.topic} — ${data.name}`;
+      const body = [data.topic, data.budget, data.timeline, data.email, data.message].filter(Boolean).join('\n');
+
+      // 還沒設定 Web3Forms key：改用寄信程式
+      if (!key) {
+        location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        return;
+      }
+
+      button.disabled = true;
+      status.textContent = sending ?? '';
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ access_key: key, subject, from_name: data.name, ...data }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        status.textContent = ok ?? '';
+        form.reset();
+      } catch {
+        status.textContent = `${err} ${email}`;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .madlibs {
+    display: grid;
+    gap: 28px;
+  }
+
+  .sentence {
+    margin: 0;
+    font: 500 clamp(1.5rem, 3.6vw, 2.6rem) / 1.75 var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  .sentence input,
+  .sentence select {
+    max-width: 100%;
+    margin: 0 0.15em;
+    padding: 0 0.2em;
+    border: 0;
+    border-bottom: 3px dashed var(--ink);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .sentence select {
+    appearance: none;
+    padding-right: 1.1em;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231c1b18' stroke-width='2'/%3E%3C/svg%3E")
+      right 0.1em center / 0.5em no-repeat;
+    cursor: pointer;
+  }
+
+  .sentence input::placeholder {
+    color: var(--muted);
+    opacity: 0.6;
+    font-weight: 500;
+  }
+
+  .sentence :is(input, select):focus {
+    border-bottom-style: solid;
+    border-color: var(--sky);
+    background-color: var(--butter);
+    outline: none;
+  }
+
+  .more {
+    display: grid;
+    gap: 8px;
+    max-width: 640px;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  textarea {
+    padding: 14px 16px;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-md);
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    resize: vertical;
+  }
+
+  textarea:focus {
+    border-color: var(--sky);
+    outline: none;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .status {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+</style>

@@ -1,0 +1,51 @@
+---
+import { languages, type Lang } from '../i18n/ui';
+import { t } from '../i18n/utils';
+
+interface Props {
+  lang: Lang;
+  alternate: string;
+}
+
+const { lang, alternate } = Astro.props;
+---
+
+<div class="switch" role="group" aria-label={t(lang)('lang.label')}>
+  {
+    (Object.keys(languages) as Lang[]).map((code) =>
+      code === lang ? (
+        <span class="opt active" aria-current="true">{languages[code]}</span>
+      ) : (
+        <a class="opt" href={alternate} hreflang={code} lang={code === 'en' ? 'en' : 'zh-Hant-TW'}>
+          {languages[code]}
+        </a>
+      ),
+    )
+  }
+</div>
+
+<style>
+  .switch {
+    display: inline-flex;
+    padding: 3px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .opt {
+    padding: 0.25em 0.7em;
+    border-radius: 999px;
+    text-decoration: none;
+  }
+
+  .active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  a.opt:hover {
+    background: var(--butter);
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { t } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  entry: CollectionEntry<'crochet'>;
+  lang: Lang;
+}
+
+const { entry, lang } = Astro.props;
+const { title, summary, status, cover } = entry.data;
+---
+
+<article class="piece">
+  <div class="media">
+    {
+      cover ? (
+        <Image src={cover} alt={title} widths={[400, 700]} sizes="(min-width: 900px) 33vw, 100vw" />
+      ) : (
+        <svg class="yarn" viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="38" />
+          <path d="M18 38c20 6 44 4 64-10M14 56c24 8 52 6 72-14M22 74c18 4 40 0 56-16M40 13c-6 22-4 50 10 75" />
+        </svg>
+      )
+    }
+    <span class:list={['status', status]}>{t(lang)(`crochet.status.${status}`)}</span>
+  </div>
+  <h3>{title}</h3>
+  <p class="muted">{summary}</p>
+</article>
+
+<style>
+  .media {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 2px dashed var(--ink);
+    border-radius: 50% 50% var(--radius-lg) var(--radius-lg);
+    background: var(--sand);
+  }
+
+  .media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .yarn {
+    width: 55%;
+    fill: var(--leaf);
+    stroke: var(--ink);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+
+  .yarn path {
+    fill: none;
+  }
+
+  .status {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    padding: 0.2em 0.8em;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--butter);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .status.available { background: var(--leaf); }
+  .status.sold { background: var(--paper); color: var(--muted); }
+
+  h3 {
+    margin: 16px 0 4px;
+    font-size: 1.35rem;
+  }
+</style>

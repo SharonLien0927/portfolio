@@ -1,0 +1,13 @@
+---
+import ProjectView from '../../../views/ProjectView.astro';
+import { getLocalized, splitId } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getLocalized('projects', 'en');
+  return entries.map((e) => ({ params: { slug: splitId(e.id).slug } }));
+}
+
+const { slug } = Astro.params;
+---
+
+<ProjectView lang="en" slug={slug} />

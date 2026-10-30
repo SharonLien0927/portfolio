@@ -1,0 +1,80 @@
+---
+import ServiceCard from '../ServiceCard.astro';
+import { getLocalized } from '../../lib/content';
+import { t } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+const services = await getLocalized('services', lang);
+const groups = [
+  { key: 'digital', label: tr('services.digital'), en: 'Digital' },
+  { key: 'handmade', label: tr('services.handmade'), en: 'Handmade' },
+] as const;
+---
+
+<section id="services" class="section section--sand">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">{tr('services.eyebrow')}</p>
+        <h2 class="h2">{tr('services.title')}</h2>
+      </div>
+    </div>
+
+    {
+      groups.map((g) => {
+        const items = services.filter((s) => s.data.group === g.key);
+        return (
+          <div class="group" data-group={g.key}>
+            <h3 class="group-title">
+              <span class="dot" aria-hidden="true" />
+              {lang === 'en' ? g.en : `${g.en} ${g.label}`}
+            </h3>
+            <div class="cards">
+              {items.map((entry, i) => (
+                <ServiceCard entry={entry} index={i} />
+              ))}
+            </div>
+          </div>
+        );
+      })
+    }
+  </div>
+</section>
+
+<style>
+  .group + .group {
+    margin-top: clamp(40px, 6vw, 72px);
+  }
+
+  .group-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  }
+
+  .dot {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--sky);
+  }
+
+  [data-group='handmade'] .dot {
+    background: var(--leaf);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+</style>

@@ -1,0 +1,41 @@
+---
+import { render } from 'astro:content';
+import MadLibsForm from '../MadLibsForm.astro';
+import { getPage } from '../../lib/content';
+import { t } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const page = await getPage('contact', lang);
+const { Content } = await render(page);
+---
+
+<section id="contact" class="section">
+  <div class="container">
+    <div class="panel">
+      <p class="eyebrow">{t(lang)('contact.eyebrow')}</p>
+      <h2 class="h2">{page.data.title}</h2>
+      <div class="intro muted"><Content /></div>
+      <MadLibsForm lang={lang} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .panel {
+    padding: clamp(28px, 6vw, 72px);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-lg);
+    background: var(--paper);
+    box-shadow: 0 10px 0 var(--sky);
+  }
+
+  .intro {
+    max-width: 56ch;
+    margin: 16px 0 32px;
+  }
+</style>

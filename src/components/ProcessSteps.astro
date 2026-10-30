@@ -1,0 +1,87 @@
+---
+interface Props {
+  steps: { title: string; text: string }[];
+}
+
+const { steps } = Astro.props;
+---
+
+<ol class="steps" style={`--n: ${steps.length}`}>
+  {
+    steps.map((step, i) => (
+      <li>
+        <span class="num">{i + 1}</span>
+        <h3>{step.title}</h3>
+        <p class="muted">{step.text}</p>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(var(--n), 1fr);
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+    padding: 28px 24px 24px;
+    border: 2px dashed var(--ink);
+    border-radius: var(--radius-lg);
+    background: var(--paper);
+  }
+
+  /* 卡片之間的「縫線」 */
+  li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50px;
+    right: -22px;
+    width: 24px;
+    border-top: 2px dashed var(--ink);
+  }
+
+  .num {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--leaf);
+    font: 700 1.2rem/1 var(--font-display);
+  }
+
+  h3 {
+    margin-bottom: 8px;
+    font-size: 1.3rem;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  /* 窄螢幕改直排，縫線改成上下連接 */
+  @media (max-width: 860px) {
+    .steps {
+      grid-template-columns: 1fr;
+    }
+
+    li:not(:last-child)::after {
+      top: auto;
+      right: auto;
+      bottom: -22px;
+      left: 47px;
+      width: 0;
+      height: 24px;
+      border-top: 0;
+      border-left: 2px dashed var(--ink);
+    }
+  }
+</style>

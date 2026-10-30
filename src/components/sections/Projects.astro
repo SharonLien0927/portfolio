@@ -1,0 +1,62 @@
+---
+import ProjectCard from '../ProjectCard.astro';
+import { getLocalized } from '../../lib/content';
+import { t } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+const projects = await getLocalized('projects', lang);
+---
+
+<section id="projects" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">{tr('projects.eyebrow')}</p>
+        <h2 class="h2">{tr('projects.title')}</h2>
+      </div>
+      <p class="count muted">{String(projects.length).padStart(2, '0')}</p>
+    </div>
+    <div class="grid">
+      {projects.map((entry, i) => <ProjectCard entry={entry} lang={lang} index={i} />)}
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../../scripts/hover-video.ts';
+</script>
+
+<style>
+  .count {
+    margin: 0;
+    font: 700 clamp(2.5rem, 6vw, 4.5rem) / 1 var(--font-display);
+    opacity: 0.35;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(32px, 5vw, 56px) clamp(20px, 3vw, 40px);
+  }
+
+  /* 錯落排列，打破死板的格線 */
+  .grid > :global(:nth-child(even)) {
+    margin-top: clamp(0px, 8vw, 96px);
+  }
+
+  @media (max-width: 720px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .grid > :global(:nth-child(even)) {
+      margin-top: 0;
+    }
+  }
+</style>

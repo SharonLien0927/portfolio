@@ -1,0 +1,106 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CrochetCard from '../components/CrochetCard.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import ComingSoon from '../components/ComingSoon.astro';
+import { getLocalized, getPage } from '../lib/content';
+import { localePath, otherLang, t } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+const intro = await getPage('crochet-intro', lang);
+const process = await getPage('crochet-process', lang);
+const { Content: Intro } = await render(intro);
+const { Content: ProcessIntro } = await render(process);
+const pieces = await getLocalized('crochet', lang);
+---
+
+<BaseLayout lang={lang} title={tr('nav.crochet')} description={intro.data.title} alternate={localePath(otherLang(lang), 'crochet/')}>
+  <section class="intro container">
+    {intro.data.eyebrow && <p class="eyebrow">{intro.data.eyebrow}</p>}
+    <h1>{intro.data.title}</h1>
+    <div class="lead muted"><Intro /></div>
+    <div class="ctas">
+      <a class="btn btn--leaf" href={localePath(lang, '#contact')}>{tr('crochet.cta')} <span class="arrow">→</span></a>
+      <a class="btn" href="#process">{tr('crochet.process')}</a>
+    </div>
+  </section>
+
+  <section class="section works">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="h2">{tr('crochet.works')}</h2>
+      </div>
+      <div class="grid">
+        {pieces.map((entry) => <CrochetCard entry={entry} lang={lang} />)}
+      </div>
+    </div>
+  </section>
+
+  <section id="process" class="section section--sand">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">{tr('crochet.process')}</p>
+          <h2 class="h2">{process.data.title}</h2>
+        </div>
+        <div class="process-intro muted"><ProcessIntro /></div>
+      </div>
+      {process.data.steps && <ProcessSteps steps={process.data.steps} />}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <ComingSoon lang={lang} />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    padding-block: clamp(56px, 10vw, 120px) 24px;
+  }
+
+  h1 {
+    max-width: 14ch;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+  }
+
+  .lead {
+    max-width: 50ch;
+    margin-top: 24px;
+    font-size: 1.2rem;
+  }
+
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 28px;
+  }
+
+  .works {
+    padding-top: clamp(48px, 6vw, 80px);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 32px 24px;
+  }
+
+  .process-intro {
+    max-width: 40ch;
+  }
+
+  .process-intro :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>
