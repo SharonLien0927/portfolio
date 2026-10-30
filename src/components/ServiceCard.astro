@@ -8,8 +8,7 @@ interface Props {
 
 const { entry, index } = Astro.props;
 const { Content } = await render(entry);
-const digital = entry.data.group === 'digital';
-// 小貼紙的顏色組合，依序輪替
+// 小貼紙的顏色組合，依序輪替；圖案固定是「方塊 + 毛線球」，跟標誌一樣
 const pairs = [
   ['#30c0f0', '#fff385'],
   ['#67b935', '#fbefc7'],
@@ -18,18 +17,14 @@ const pairs = [
 const [a, b] = pairs[index % pairs.length];
 ---
 
-<article class="service card">
+<article class="service card" data-group={entry.data.group}>
   <div class="stickers" aria-hidden="true">
     <span style={`background:${a}`}>
-      {
-        digital ? (
-          <svg viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z" fill="none" stroke="#1c1b18" stroke-width="1.8" stroke-linejoin="round" /><path d="M12 12l8-4.5M12 12 4 7.5M12 12v9" stroke="#1c1b18" stroke-width="1.8" /></svg>
-        ) : (
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1c1b18" stroke-width="1.8" /><path d="M5 10c4 2 9 1 13-3M5 14c5 2 10 1 14-3M9 4c-2 5-1 11 3 16" stroke="#1c1b18" stroke-width="1.6" fill="none" stroke-linecap="round" /></svg>
-        )
-      }
+      <svg viewBox="0 0 24 24"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z" fill="none" stroke="#1c1b18" stroke-width="1.8" stroke-linejoin="round" /><path d="M12 12l8-4.5M12 12 4 7.5M12 12v9" stroke="#1c1b18" stroke-width="1.8" /></svg>
     </span>
-    <span style={`background:${b}`}></span>
+    <span style={`background:${b}`}>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1c1b18" stroke-width="1.8" /><path d="M5 10c4 2 9 1 13-3M5 14c5 2 10 1 14-3M9 4c-2 5-1 11 3 16" stroke="#1c1b18" stroke-width="1.6" fill="none" stroke-linecap="round" /></svg>
+    </span>
   </div>
   <h3>{entry.data.title}</h3>
   <div class="body muted"><Content /></div>
