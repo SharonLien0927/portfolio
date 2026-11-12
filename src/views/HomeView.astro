@@ -22,7 +22,7 @@ const about = await getPage('about', lang);
 const nav = await homeNav(lang, true);
 ---
 
-<BaseLayout lang={lang} description={hero.data.title} alternate={localePath(otherLang(lang))} nav={nav}>
+<BaseLayout lang={lang} description={hero.data.title} alternate={localePath(otherLang(lang))} nav={nav} intro>
   <HomeHero lang={lang} page={hero}>
     <a class="btn btn--sky lc" href={localePath(lang, '3d/')}>{tr('hero.cta3d')} →</a>
     <a class="btn btn--butter lc" href={localePath(lang, 'yarn/')}>{tr('hero.ctaYarn')} →</a>

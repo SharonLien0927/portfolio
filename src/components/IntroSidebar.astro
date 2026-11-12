@@ -1,0 +1,53 @@
+---
+// 首頁封面模式（平板、桌機）：
+// - 一開始封面滿版、左側選單隱藏（html.intro-on）
+// - 往下滑過封面一半，選單從左邊淡入；往上回到封面再收起來
+// - 封面上方的「選單」按鈕可以先叫出選單（html.side-peek），點外面或按 Esc 收起
+---
+
+<script>
+  const root = document.documentElement;
+  const hero = document.querySelector<HTMLElement>('[data-home-hero]');
+  const sidebar = document.querySelector<HTMLElement>('[data-sidebar]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-intro-menu]');
+
+  if (hero && sidebar) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      // 封面底部滑到畫面一半以上 = 封面看得差不多了
+      const past = hero.getBoundingClientRect().bottom < innerHeight * 0.5;
+      root.classList.toggle('intro-on', !past);
+      if (past) closePeek();
+    };
+    addEventListener('scroll', () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    }, { passive: true });
+    addEventListener('resize', update);
+    update();
+
+    const closePeek = () => {
+      root.classList.remove('side-peek');
+      toggle?.setAttribute('aria-expanded', 'false');
+    };
+    toggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = !root.classList.contains('side-peek');
+      root.classList.toggle('side-peek', open);
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', (e) => {
+      if (root.classList.contains('side-peek') && !sidebar.contains(e.target as Node)) closePeek();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePeek();
+    });
+    // 點選單裡的連結後收起
+    sidebar.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) closePeek();
+    });
+  }
+</script>

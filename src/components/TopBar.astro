@@ -1,5 +1,8 @@
 ---
 import LangSwitch from './LangSwitch.astro';
+import Logo from './Logo.astro';
+import { localePath, t } from '../i18n/utils';
+import { site } from '../config';
 import type { Lang } from '../i18n/ui';
 
 interface Props {
@@ -7,13 +10,29 @@ interface Props {
   alternate: string;
   status?: string;
   since?: string;
+  /** 首頁封面模式：左邊多一個標誌和「選單」按鈕（左側選單隱藏時用） */
+  intro?: boolean;
 }
 
-const { lang, alternate, status, since } = Astro.props;
+const { lang, alternate, status, since, intro = false } = Astro.props;
+const tr = t(lang);
 ---
 
 <div class="topbar">
-  {status ? <p class="status"><span class="dot" aria-hidden="true"></span>{status}</p> : <span></span>}
+  <div class="left">
+    {
+      intro && (
+        <div class="intro-brand">
+          <a class="home" href={localePath(lang)} aria-label={site.name[lang]}><Logo size={24} /></a>
+          <button class="menu-btn lc" type="button" data-intro-menu aria-expanded="false" aria-controls="side-body">
+            <span class="bars" aria-hidden="true"></span>
+            {tr('nav.menu')}
+          </button>
+        </div>
+      )
+    }
+    {status ? <p class="status"><span class="dot" aria-hidden="true"></span>{status}</p> : <span></span>}
+  </div>
   <div class="right">
     {since && <span class="chip">est.{since} <span aria-hidden="true">→</span> ∞</span>}
     <span class="chip lang"><LangSwitch lang={lang} alternate={alternate} /></span>
@@ -27,6 +46,74 @@ const { lang, alternate, status, since } = Astro.props;
     justify-content: space-between;
     gap: 12px;
     min-height: 34px;
+  }
+
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  /* 標誌和選單按鈕只在首頁封面、平板與桌機出現 */
+  .intro-brand {
+    display: none;
+    align-items: center;
+    gap: 12px;
+  }
+
+  :global(html[data-intro]) .intro-brand {
+    display: flex;
+  }
+
+  .home {
+    display: inline-flex;
+  }
+
+  .menu-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+    border-radius: 999px;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+    font: 500 0.9rem/1 var(--font-body);
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.3s;
+  }
+
+  .menu-btn:hover {
+    background: color-mix(in srgb, var(--ink) 14%, transparent);
+  }
+
+  .bars,
+  .bars::before,
+  .bars::after {
+    display: block;
+    width: 14px;
+    height: 1.5px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+
+  .bars {
+    position: relative;
+  }
+
+  .bars::before,
+  .bars::after {
+    content: '';
+    position: absolute;
+  }
+
+  .bars::before { top: -4px; }
+  .bars::after { top: 4px; }
+
+  /* 選單已經出現在左邊時，按鈕淡出 */
+  :global(html[data-intro]:not(.intro-on)) .menu-btn {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .status {
@@ -71,6 +158,11 @@ const { lang, alternate, status, since } = Astro.props;
 
   @media (max-width: 809px) {
     .chip.lang {
+      display: none;
+    }
+
+    /* 手機本來就有上方選單，不需要 */
+    :global(html[data-intro]) .intro-brand {
       display: none;
     }
   }

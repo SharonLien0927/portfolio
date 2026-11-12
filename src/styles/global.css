@@ -89,6 +89,51 @@ p {
   padding: var(--gap);
 }
 
+/*
+  首頁封面模式（平板、桌機）：
+  封面和上方列往左延伸蓋住側欄位置，變成滿版；側欄先隱藏，滑過封面後才淡入。
+  下方內容一直保留側欄的空位，所以選單出現時內容不會跳動。
+*/
+@media (min-width: 810px) {
+  html[data-intro] .main > .topbar,
+  html[data-intro] .home-hero {
+    width: calc(100% + var(--side-w) + var(--gap));
+    margin-left: calc(-1 * (var(--side-w) + var(--gap)));
+  }
+
+  html[data-intro] .main > .topbar {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* 封面剛好填滿第一個畫面（扣掉上方列與外框留白），下方的精選不會露出來 */
+  html[data-intro] .main > .topbar {
+    height: 34px;
+  }
+
+  html[data-intro] .home-hero {
+    z-index: 1;
+    min-height: calc(100svh - var(--gap) - 34px);
+  }
+
+  html[data-intro] [data-sidebar] {
+    z-index: 3;
+    transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s;
+  }
+
+  html[data-intro].intro-on:not(.side-peek) [data-sidebar] {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(-24px);
+    pointer-events: none;
+  }
+
+  /* 在封面上按「選單」叫出來時，加陰影浮在封面上 */
+  html.side-peek [data-sidebar] {
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+  }
+}
+
 /* 主內容是 container，裡面的大標題用 cqi 跟著主欄寬度縮放 */
 .main {
   min-width: 0;
