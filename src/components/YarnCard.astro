@@ -12,7 +12,10 @@ interface Props {
 }
 
 const { entry, lang, index } = Astro.props;
-const { title, summary, status, cover } = entry.data;
+const { title, summary, status, kind, cover } = entry.data;
+// 手作日常不接單，標籤改顯示「手作日常」
+const tagClass = kind === 'daily' ? 'daily' : status;
+const tagLabel = kind === 'daily' ? t(lang)('yarn.daily') : t(lang)(`yarn.status.${status}`);
 const tints = ['#fff5d4', '#e3f6fd', '#eef7e7', '#fff9c2'];
 const href = localePath(lang, `yarn/${splitId(entry.id).slug}/`);
 ---
@@ -22,7 +25,7 @@ const href = localePath(lang, `yarn/${splitId(entry.id).slug}/`);
   <div class="media" style={`background:${tints[index % tints.length]}`}>
     {
       cover ? (
-        <Image src={cover} alt={title} widths={[400, 700]} sizes="(min-width: 1000px) 25vw, 100vw" />
+        <Image src={cover} alt={title} widths={[400, 700]} sizes="(min-width: 1200px) 20vw, (min-width: 810px) 30vw, 50vw" />
       ) : (
         <svg class="yarn" viewBox="0 0 100 100" aria-hidden="true">
           <circle cx="50" cy="50" r="34" />
@@ -34,7 +37,7 @@ const href = localePath(lang, `yarn/${splitId(entry.id).slug}/`);
   <div class="info">
     <div class="head">
       <h3>{title}</h3>
-      <span class:list={['tag', status]}>{t(lang)(`yarn.status.${status}`)}</span>
+      <span class:list={['tag', tagClass]}>{tagLabel}</span>
     </div>
     <p class="muted">{summary}</p>
   </div>
@@ -66,7 +69,7 @@ const href = localePath(lang, `yarn/${splitId(entry.id).slug}/`);
   .media {
     display: grid;
     place-items: center;
-    aspect-ratio: 1;
+    aspect-ratio: 4 / 5;
     margin: 6px;
     overflow: hidden;
     border-radius: 4px;
@@ -99,27 +102,45 @@ const href = localePath(lang, `yarn/${splitId(entry.id).slug}/`);
     padding: 6px 14px 14px;
   }
 
+  /* 卡片夠寬時標題和標籤同一行，太窄（四欄、手機兩欄）時標籤自動換到下一行 */
   .head {
     display: flex;
+    flex-wrap: wrap;
     align-items: start;
     justify-content: space-between;
-    gap: 8px;
+    gap: 4px 8px;
   }
 
   h3 {
+    flex: 1 1 7.5em;
     font-size: 1.05rem;
     font-weight: 600;
   }
+
 
   .tag {
     flex-shrink: 0;
   }
 
   .tag.available { background: #cdeab8; }
+  .tag.daily { background: transparent; box-shadow: inset 0 0 0 1px currentColor; opacity: 0.75; }
   .tag.sold { background: var(--sand); color: var(--muted); }
 
   p {
     margin: 6px 0 0;
     font-size: 0.88rem;
+  }
+  @media (max-width: 809px) {
+    .info {
+      padding: 4px 10px 12px;
+    }
+
+    h3 {
+      font-size: 0.95rem;
+    }
+
+    p {
+      font-size: 0.8rem;
+    }
   }
 </style>

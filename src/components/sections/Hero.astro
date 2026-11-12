@@ -7,9 +7,11 @@ import type { Lang } from '../../i18n/ui';
 interface Props {
   lang: Lang;
   page: CollectionEntry<'pages'>;
+  /** 大字用玻璃 3D 效果，滑鼠移動時會微微傾斜 */
+  glass?: boolean;
 }
 
-const { lang, page } = Astro.props;
+const { lang, page, glass = false } = Astro.props;
 const { Content } = await render(page);
 const lines = page.data.lines ?? [page.data.title];
 const [l1 = page.data.title, l2 = '', l3 = ''] = lines;
@@ -18,7 +20,7 @@ const sinceLabel = t(lang)('since');
 const below = page.data.leadPosition === 'below';
 ---
 
-<section class="hero">
+<section class:list={['hero', { glass }]}>
   <h1 class="visually-hidden">{page.data.title}</h1>
   {
     below ? (
@@ -58,6 +60,28 @@ const below = page.data.leadPosition === 'below';
     )
   }
 </section>
+
+<script>
+  // 玻璃字：滑鼠在大標題區移動時整組字微微傾斜（觸控裝置、減少動態效果時不啟用）
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches || !matchMedia('(hover: hover)').matches;
+  if (!still) {
+    for (const hero of document.querySelectorAll<HTMLElement>('.hero.glass')) {
+      const headline = hero.querySelector<HTMLElement>('.headline');
+      if (!headline) continue;
+      hero.addEventListener('pointermove', (e) => {
+        const r = hero.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        headline.style.setProperty('--ry', `${(x * 10).toFixed(2)}deg`);
+        headline.style.setProperty('--rx', `${(-y * 8).toFixed(2)}deg`);
+      });
+      hero.addEventListener('pointerleave', () => {
+        headline.style.setProperty('--ry', '0deg');
+        headline.style.setProperty('--rx', '0deg');
+      });
+    }
+  }
+</script>
 
 <style>
   .hero {
@@ -127,16 +151,14 @@ const below = page.data.leadPosition === 'below';
     整體是一條從左上往右下的斜線，視線自然走到按鈕和簡介
   */
   /* --gutter：兩行之間的上下距離 = 最後一行跟按鈕的左右距離，視覺上一致 */
-  .stair {
+  /* 3D 頁、編織頁的大字：電腦版固定 85px（平板、手機在下方另外縮小） */
+  .stair,
+  :lang(zh-Hant-TW) .stair {
     justify-items: start;
-    font-size: max(2.6rem, 8.5cqi);
+    font-size: 85px;
     gap: var(--gutter);
     --step: 1.1em;
     --gutter: 0.3em;
-  }
-
-  :lang(zh-Hant-TW) .stair {
-    font-size: max(2.4rem, 8.9cqi);
   }
 
   .stair .row {
@@ -167,6 +189,63 @@ const below = page.data.leadPosition === 'below';
     text-align: left;
   }
 
+  /*
+    玻璃 3D 字：
+    - 字填色是由上而下的漸層（亮 → 半透明），像霧面玻璃
+    - 細亮邊當玻璃邊緣
+    - 兩層往右下偏移的 drop-shadow 疊出厚度，再加一圈光暈
+    - 三行放在不同深度，滑鼠傾斜時會有前後層次
+    淺色主題用深色玻璃，深色主題用白色玻璃
+  */
+  .glass {
+    --g1: var(--ink);
+    --g2: color-mix(in srgb, var(--ink) 72%, transparent);
+    --g3: color-mix(in srgb, var(--ink) 30%, transparent);
+    --edge: color-mix(in srgb, var(--ink) 35%, transparent);
+    --depth: rgb(255 255 255 / 0.65);
+    --halo: transparent;
+    perspective: 1100px;
+  }
+
+  :global(html[data-theme='crystal']) .glass {
+    --g1: #ffffff;
+    --g2: rgb(236 234 246 / 0.78);
+    --g3: rgb(188 184 213 / 0.32);
+    --edge: rgb(255 255 255 / 0.5);
+    --depth: rgb(60 70 140 / 0.55);
+    --halo: color-mix(in srgb, var(--lavender) 45%, transparent);
+  }
+
+  .glass .headline {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transform-style: preserve-3d;
+    transition: transform 0.35s ease-out;
+  }
+
+  .glass .row {
+    transform: translateZ(calc((2 - var(--i, 0)) * 16px));
+  }
+
+  /* 手機不會傾斜，也不需要前後深度（避免第一行被放大貼到邊緣） */
+  @media (max-width: 809px) {
+    .glass .row {
+      transform: none;
+    }
+  }
+
+  .glass :global(.txt) {
+    color: transparent;
+    background: linear-gradient(180deg, var(--g1) 8%, var(--g2) 55%, var(--g3) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-stroke: 0.012em var(--edge);
+    text-shadow: none;
+    filter:
+      drop-shadow(0.012em 0.018em 0 var(--depth))
+      drop-shadow(0.012em 0.018em 0 var(--depth))
+      drop-shadow(0 0 0.28em var(--halo));
+  }
+
   /* 平板：主欄比較窄，字級比例放大一點 */
   @media (min-width: 810px) and (max-width: 1199px) {
     .headline {
@@ -177,8 +256,10 @@ const below = page.data.leadPosition === 'below';
       font-size: 11cqi;
     }
 
+    /* 平板塞不下 85px，跟著主欄寬度縮小，最大不超過 85px */
+    .stair,
     :lang(zh-Hant-TW) .stair {
-      font-size: 11.5cqi;
+      font-size: min(85px, 11.5cqi);
       --step: 0.8em;
     }
   }

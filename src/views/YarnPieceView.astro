@@ -17,7 +17,8 @@ const { lang, slug } = Astro.props;
 const tr = t(lang);
 const entry = (await getEntry('yarn', `${lang}/${slug}`))!;
 const { Content } = await render(entry);
-const { title, summary, status, technique, yarn, size, cover, gallery } = entry.data;
+const { title, summary, status, kind, technique, yarn, size, cover, gallery } = entry.data;
+const daily = kind === 'daily';
 
 // 另一個語言有同名檔案就連過去，沒有就回另一個語言的編織頁
 const other = otherLang(lang);
@@ -27,11 +28,12 @@ const alternate = localePath(other, translated ? `yarn/${slug}/` : 'yarn/');
 const all = await getLocalized('yarn', lang);
 const next = all[(all.findIndex((p) => p.id === entry.id) + 1) % all.length];
 const meta = [
-  { label: tr('yarn.status'), value: tr(`yarn.status.${status}`) },
+  daily ? { label: tr('yarn.kind'), value: tr('yarn.daily') } : { label: tr('yarn.status'), value: tr(`yarn.status.${status}`) },
   { label: tr('yarn.technique'), value: technique && tr(`technique.${technique}`) },
   { label: tr('yarn.yarn'), value: yarn },
   { label: tr('yarn.size'), value: size },
 ].filter((m) => m.value);
+const photos = [cover, ...gallery].filter((img) => img !== undefined);
 ---
 
 <BaseLayout
@@ -40,12 +42,52 @@ const meta = [
     <a class="back lc" href={localePath(lang, 'yarn/#works')}>← {tr('yarn.back')}</a>
 
     <div class="layout">
-      <div class="photo">
+      <!-- 照片：一張以上時，下方顯示縮圖列，點縮圖或左右箭頭切換大圖 -->
+      <div class="viewer" data-viewer>
+        <div class="photo">
+          {
+            photos.length > 0 ? (
+              photos.map((img, i) => (
+                <Image
+                  src={img}
+                  alt={`${title} ${i + 1}`}
+                  widths={[600, 900, 1200]}
+                  sizes="(min-width: 810px) 45vw, 100vw"
+                  loading="eager"
+                  class:list={{ active: i === 0 }}
+                  data-slide={i}
+                />
+              ))
+            ) : (
+              <div class="placeholder"><Orb kind="yarn" size="42%" /></div>
+            )
+          }
+          {
+            photos.length > 1 && (
+              <>
+                <button class="nav prev" type="button" aria-label={tr('yarn.prev')} data-step="-1">‹</button>
+                <button class="nav next-photo" type="button" aria-label={tr('yarn.nextPhoto')} data-step="1">›</button>
+                <span class="count" aria-hidden="true"><b data-current>1</b> / {photos.length}</span>
+              </>
+            )
+          }
+        </div>
         {
-          cover ? (
-            <Image src={cover} alt={title} widths={[600, 900, 1200]} sizes="(min-width: 810px) 45vw, 100vw" loading="eager" />
-          ) : (
-            <div class="placeholder"><Orb kind="yarn" size="42%" /></div>
+          photos.length > 1 && (
+            <div class="thumbs" role="tablist" aria-label={tr('yarn.photos')}>
+              {photos.map((img, i) => (
+                <button
+                  type="button"
+                  role="tab"
+                  class:list={['thumb', { active: i === 0 }]}
+                  aria-selected={i === 0 ? 'true' : 'false'}
+                  aria-label={`${tr('yarn.photo')} ${i + 1}`}
+                  data-thumb={i}
+                >
+                  <Image src={img} alt="" width={160} />
+                </button>
+              ))}
+            </div>
           )
         }
       </div>
@@ -64,19 +106,13 @@ const meta = [
           }
         </dl>
         <div class="prose"><Content /></div>
-        <a class="btn btn--leaf lc" href={localePath(lang, '#contact')}>{tr('yarn.cta')} →</a>
+        {daily ? (
+          <p class="daily-note muted">{tr('yarn.dailyIntro')}</p>
+        ) : (
+          <a class="btn btn--leaf lc" href={localePath(lang, '#contact')}>{tr('yarn.cta')} →</a>
+        )}
       </div>
     </div>
-
-    {
-      gallery.length > 0 && (
-        <div class="gallery">
-          {gallery.map((img) => (
-            <Image src={img} alt={title} widths={[400, 700]} sizes="(min-width: 810px) 33vw, 100vw" />
-          ))}
-        </div>
-      )
-    }
 
     {
       next && next.id !== entry.id && (
@@ -89,6 +125,38 @@ const meta = [
     }
   </article>
 </BaseLayout>
+
+<script>
+  for (const viewer of document.querySelectorAll<HTMLElement>('[data-viewer]')) {
+    const slides = [...viewer.querySelectorAll<HTMLElement>('[data-slide]')];
+    const thumbs = [...viewer.querySelectorAll<HTMLButtonElement>('[data-thumb]')];
+    const current = viewer.querySelector('[data-current]');
+    if (slides.length < 2) continue;
+    let index = 0;
+    const show = (i: number) => {
+      index = (i + slides.length) % slides.length;
+      slides.forEach((s, k) => s.classList.toggle('active', k === index));
+      thumbs.forEach((t, k) => {
+        t.classList.toggle('active', k === index);
+        t.setAttribute('aria-selected', String(k === index));
+      });
+      thumbs[index]?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      if (current) current.textContent = String(index + 1);
+    };
+    thumbs.forEach((t) => t.addEventListener('click', () => show(Number(t.dataset.thumb))));
+    viewer.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
+      b.addEventListener('click', () => show(index + Number(b.dataset.step))),
+    );
+    // 手機左右滑動切換
+    let startX = 0;
+    const photo = viewer.querySelector<HTMLElement>('.photo')!;
+    photo.addEventListener('touchstart', (e) => (startX = e.touches[0].clientX), { passive: true });
+    photo.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 40) show(index + (dx < 0 ? 1 : -1));
+    });
+  }
+</script>
 
 <style>
   .piece-page {
@@ -115,16 +183,126 @@ const meta = [
     gap: clamp(24px, 4vw, 56px);
   }
 
-  .photo {
+  .viewer {
     position: sticky;
     top: 24px;
+  }
+
+  .photo {
+    position: relative;
     overflow: hidden;
-    aspect-ratio: 1;
+    aspect-ratio: 4 / 5;
     border-radius: var(--radius);
     background: var(--cream);
   }
 
   .photo :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .photo :global(img.active) {
+    opacity: 1;
+  }
+
+  .nav {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0 0 3px;
+    border: 0;
+    border-radius: 50%;
+    color: #1d2433;
+    background: rgb(255 255 255 / 0.82);
+    box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
+    font-size: 1.7rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-50%);
+    transition: opacity 0.2s, background 0.2s;
+  }
+
+  .prev {
+    left: 12px;
+  }
+
+  .next-photo {
+    right: 12px;
+  }
+
+  .photo:hover .nav,
+  .nav:focus-visible {
+    opacity: 1;
+  }
+
+  .nav:hover {
+    background: #fff;
+  }
+
+  .count {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 1;
+    padding: 3px 10px;
+    border-radius: 999px;
+    color: #fff;
+    background: rgb(0 0 0 / 0.45);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .count b {
+    font-weight: 600;
+  }
+
+  /* 縮圖列：可以左右捲動，選到的那張有框線 */
+  .thumbs {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .thumb {
+    flex: 0 0 auto;
+    width: 76px;
+    aspect-ratio: 4 / 5;
+    padding: 0;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: var(--cream);
+    cursor: pointer;
+    opacity: 0.6;
+    scroll-snap-align: start;
+    transition: opacity 0.2s, border-color 0.2s;
+  }
+
+  .thumb:hover {
+    opacity: 1;
+  }
+
+  .thumb.active {
+    border-color: var(--honey, #ffdb83);
+    opacity: 1;
+  }
+
+  .thumb :global(img) {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -171,18 +349,11 @@ const meta = [
     margin-bottom: 28px;
   }
 
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 48px;
-  }
-
-  .gallery :global(img) {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: var(--radius);
+  .daily-note {
+    margin: 0;
+    padding-top: 16px;
+    border-top: 1.5px dashed var(--dash);
+    font-size: 0.9rem;
   }
 
   .next {
@@ -222,12 +393,19 @@ const meta = [
       grid-template-columns: 1fr;
     }
 
-    .photo {
+    .viewer {
       position: static;
     }
 
-    .gallery {
-      grid-template-columns: repeat(2, 1fr);
+    /* 手機沒有滑鼠移上去的狀態，箭頭一直顯示 */
+    .nav {
+      opacity: 1;
+      width: 34px;
+      height: 34px;
+    }
+
+    .thumb {
+      width: 64px;
     }
   }
 </style>

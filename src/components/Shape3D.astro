@@ -1,0 +1,101 @@
+---
+// 暫代的 3D 物件（SVG 漸層畫的光澤形狀）。之後換成自己渲染的透明 PNG 時，改用 <img> 就好
+interface Props {
+  kind: 'sphere' | 'cube' | 'cone' | 'torus' | 'yarn' | 'cylinder';
+  /** 亮、中、暗三個顏色 */
+  colors: [string, string, string];
+  /** SVG 漸層 id 不能重複，用編號區分 */
+  id: string;
+}
+
+const { kind, colors, id } = Astro.props;
+const [hi, mid, dark] = colors;
+---
+
+<svg viewBox="0 0 100 100" aria-hidden="true">
+  <defs>
+    <radialGradient id={`${id}-ball`} cx="35%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="0.18" stop-color={hi} />
+      <stop offset="0.6" stop-color={mid} />
+      <stop offset="1" stop-color={dark} />
+    </radialGradient>
+    <linearGradient id={`${id}-v`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color={hi} />
+      <stop offset="1" stop-color={dark} />
+    </linearGradient>
+    <linearGradient id={`${id}-h`} x1="0" y1="0" x2="1" y2="0.3">
+      <stop offset="0" stop-color={mid} />
+      <stop offset="1" stop-color={dark} />
+    </linearGradient>
+    <clipPath id={`${id}-clip`}><circle cx="50" cy="50" r="44" /></clipPath>
+  </defs>
+
+  {kind === 'sphere' && <circle cx="50" cy="50" r="44" fill={`url(#${id}-ball)`} />}
+
+  {
+    kind === 'yarn' && (
+      <g>
+        <circle cx="50" cy="50" r="44" fill={`url(#${id}-ball)`} />
+        <g clip-path={`url(#${id}-clip)`} fill="none" stroke="#ffffff" stroke-opacity="0.75" stroke-width="2.6" stroke-linecap="round">
+          <path d="M8 40c26 10 56 8 86-16M6 56c30 12 62 10 90-14M12 72c26 8 52 4 76-14M34 6c-10 30-8 62 14 92M58 4c-14 32-12 70 12 96M78 10c-12 26-12 56 4 82" />
+        </g>
+        <path d="M86 70c8 6 10 16 2 24" fill="none" stroke={mid} stroke-width="3" stroke-linecap="round" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'cube' && (
+      <g stroke-linejoin="round" stroke-width="7">
+        <path d="M50 12 86 31 50 50 14 31z" fill={hi} stroke={hi} />
+        <path d="M14 31 50 50v38L14 69z" fill={mid} stroke={mid} />
+        <path d="M86 31 50 50v38l36-19z" fill={dark} stroke={dark} />
+        <path d="M24 31 50 18" stroke="#ffffff" stroke-opacity="0.55" stroke-width="3" stroke-linecap="round" fill="none" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'cone' && (
+      <g stroke-linejoin="round" stroke-width="6">
+        <path d="M50 8 12 78 50 92z" fill={`url(#${id}-v)`} stroke={hi} />
+        <path d="M50 8 88 78 50 92z" fill={`url(#${id}-h)`} stroke={dark} />
+        <path d="M44 22 26 62" stroke="#ffffff" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round" fill="none" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'torus' && (
+      <g>
+        <path
+          fill-rule="evenodd"
+          d="M6 52a44 30 0 1 0 88 0a44 30 0 1 0-88 0zM32 50a18 10 0 1 0 36 0a18 10 0 1 0-36 0z"
+          fill={`url(#${id}-ball)`}
+        />
+        <path d="M20 42c10-12 46-16 64-2" fill="none" stroke="#ffffff" stroke-opacity="0.6" stroke-width="3" stroke-linecap="round" />
+      </g>
+    )
+  }
+
+  {
+    kind === 'cylinder' && (
+      <g>
+        <path d="M18 24v54a32 12 0 0 0 64 0V24z" fill={`url(#${id}-h)`} />
+        <ellipse cx="50" cy="24" rx="32" ry="12" fill={hi} />
+        <path d="M26 34v40" stroke="#ffffff" stroke-opacity="0.45" stroke-width="4" stroke-linecap="round" />
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 18px 24px rgb(0 0 0 / 0.35));
+  }
+</style>

@@ -11,7 +11,8 @@ interface Props {
 
 const { lang } = Astro.props;
 const tr = t(lang);
-const pieces = (await getLocalized('yarn', lang)).slice(0, 4);
+// 首頁只放可客製的作品
+const pieces = (await getLocalized('yarn', lang)).filter((p) => p.data.kind !== 'daily').slice(0, 4);
 ---
 
 <section id="yarn" class="section yarn-preview">

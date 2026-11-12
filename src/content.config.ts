@@ -20,6 +20,16 @@ const projects = defineCollection({
       cover: image().optional(),
       // hover 預覽影片放 public/videos/，這裡寫 "videos/xxx.mp4"
       video: z.string().optional(),
+      // 案例頁上方的完整影片（有播放控制），放 public/videos/
+      film: z.string().optional(),
+      tools: z.string().optional(),
+      duration: z.string().optional(),
+      // 公開成果的連結（YouTube、網站…）
+      links: z.array(z.object({ label: z.string(), href: z.string() })).default([]),
+      // 案例頁下方的圖片區塊，例如「分鏡腳本」「算圖成果」「現場實錄」
+      galleries: z
+        .array(z.object({ title: z.string(), note: z.string().optional(), cols: z.number().default(2), images: z.array(image()) }))
+        .default([]),
       order: z.number().default(0),
     }),
 });
@@ -41,6 +51,8 @@ const yarn = defineCollection({
       title: z.string(),
       summary: z.string(),
       status: z.enum(['available', 'commission', 'sold']).default('commission'),
+      // 類型：custom 可客製的原創作品；daily 手作日常（材料包等純分享，不接單，作品頁不顯示客製按鈕）
+      kind: z.enum(['custom', 'daily']).default('custom'),
       // 工法：knit 棒針、crochet 鉤針、mixed 兩種都有
       technique: z.enum(['knit', 'crochet', 'mixed']).optional(),
       yarn: z.string().optional(),
@@ -63,6 +75,9 @@ const pages = defineCollection({
       lines: z.array(z.string()).optional(),
       // 簡介文字的位置：inline 夾在第二行左邊；below 是階梯排法，簡介和 since 徽章放在大標題下方
       leadPosition: z.enum(['inline', 'below']).default('inline'),
+      // 首頁封面：輪流切換的關鍵字、背景跑馬燈文字
+      roles: z.array(z.string()).optional(),
+      marquee: z.string().optional(),
       since: z.string().optional(),
       // About：置中的大字宣言，*星號* 包起來的字會變藍色
       statement: z.string().optional(),

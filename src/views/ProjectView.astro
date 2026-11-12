@@ -16,7 +16,7 @@ const { lang, slug } = Astro.props;
 const tr = t(lang);
 const entry = (await getEntry('projects', `${lang}/${slug}`))!;
 const { Content } = await render(entry);
-const { title, summary, year, role, client, tags, cover, video } = entry.data;
+const { title, summary, year, role, client, tags, cover, video, film, tools, duration, links, galleries } = entry.data;
 
 // 另一個語言有同名檔案就連過去，沒有就回另一個語言的作品列表
 const other = otherLang(lang);
@@ -29,6 +29,8 @@ const meta = [
   { label: tr('projects.year'), value: String(year) },
   { label: tr('projects.role'), value: role },
   { label: tr('projects.client'), value: client },
+  { label: tr('projects.tools'), value: tools },
+  { label: tr('projects.duration'), value: duration },
 ].filter((m) => m.value);
 const nav = threeDNav(lang, false);
 ---
@@ -57,7 +59,9 @@ const nav = threeDNav(lang, false);
 
     <div class="hero-media">
       {
-        video ? (
+        film ? (
+          <video src={assetUrl(film)} poster={cover?.src} controls playsinline preload="metadata" />
+        ) : video ? (
           <video src={assetUrl(video)} poster={cover?.src} autoplay muted loop playsinline />
         ) : cover ? (
           <Image src={cover} alt="" widths={[800, 1200, 1800]} sizes="(min-width: 1000px) 70vw, 100vw" loading="eager" />
@@ -67,7 +71,34 @@ const nav = threeDNav(lang, false);
       }
     </div>
 
+    {
+      links.length > 0 && (
+        <p class="links">
+          <span class="muted lc">{tr('projects.links')}</span>
+          {links.map((l) => (
+            <a class="btn" href={l.href} target="_blank" rel="noopener">{l.label} ↗</a>
+          ))}
+        </p>
+      )
+    }
+
     <div class="prose content"><Content /></div>
+
+    {
+      galleries.map((g) => (
+        <section class="gallery">
+          <h2>{g.title}</h2>
+          {g.note && <p class="muted">{g.note}</p>}
+          <div class="grid" style={`--cols: ${g.cols}`}>
+            {g.images.map((img) => (
+              <a href={img.src} target="_blank" rel="noopener">
+                <Image src={img} alt="" widths={[480, 800, 1200]} sizes={`(min-width: 810px) ${Math.round(100 / g.cols)}vw, 100vw`} />
+              </a>
+            ))}
+          </div>
+        </section>
+      ))
+    }
 
     {
       next && next.id !== entry.id && (
@@ -152,6 +183,59 @@ const nav = threeDNav(lang, false);
 
   .content {
     margin-top: 40px;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+  }
+
+  .links .muted {
+    margin-right: 6px;
+    font-size: 0.85rem;
+  }
+
+  .gallery {
+    margin-top: clamp(48px, 7vw, 80px);
+  }
+
+  .gallery h2 {
+    margin-bottom: 8px;
+    font-size: clamp(1.4rem, 2.6vw, 2rem);
+  }
+
+  .gallery .grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .gallery .grid a {
+    display: block;
+    overflow: hidden;
+    border-radius: 14px;
+  }
+
+  .gallery .grid :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.4s ease;
+  }
+
+  .gallery .grid a:hover :global(img) {
+    transform: scale(1.03);
+  }
+
+  @media (max-width: 809px) {
+    .gallery .grid {
+      grid-template-columns: repeat(min(var(--cols), 2), minmax(0, 1fr));
+      gap: 8px;
+    }
   }
 
   .next {

@@ -87,7 +87,8 @@ export function yarnNav(lang: Lang, onPage = true): NavItem[] {
   const tr = t(lang);
   const anchor = (id: string) => (onPage ? `#${id}` : localePath(lang, `yarn/#${id}`));
   return [
-    { id: 'works', href: anchor('works'), label: tr('nav.works'), detail: { text: tr('side.yarnText') } },
+    { id: 'works', href: anchor('works'), label: tr('yarn.custom'), detail: { text: tr('side.yarnText') } },
+    { id: 'daily', href: anchor('daily'), label: tr('yarn.daily'), detail: { text: tr('yarn.dailyIntro') } },
     {
       id: 'process',
       href: anchor('process'),

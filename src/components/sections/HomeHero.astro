@@ -1,0 +1,370 @@
+---
+// 首頁封面：背景跑馬燈大字 + 中間主角卡片 + 四周漂浮的 3D 物件（滑鼠視差）
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import Orb from '../Orb.astro';
+import Shape3D from '../Shape3D.astro';
+import { t } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+import { site } from '../../config';
+
+interface Props {
+  lang: Lang;
+  page: CollectionEntry<'pages'>;
+}
+
+const { lang, page } = Astro.props;
+const tr = t(lang);
+const roles = page.data.roles ?? [];
+const marquee = page.data.marquee ?? site.name[lang];
+const photo = page.data.photo;
+
+// 暫代的 3D 物件：位置（相對於封面）、大小、視差深度（正數往滑鼠方向、負數反方向）、配色
+// 之後換成自己渲染的 PNG：把 Shape3D 換成 <img src="..." />
+type Shape = {
+  kind: 'sphere' | 'cube' | 'cone' | 'torus' | 'yarn' | 'cylinder';
+  x: string;
+  y: string;
+  size: string;
+  depth: number;
+  rot?: number;
+  dur: number;
+  colors: [string, string, string];
+  phone?: boolean;
+  /** 手機上的位置與縮放（不填就跟桌機一樣） */
+  phonePos?: { x: string; y: string; scale: number };
+  /** 放在跑馬燈大字前面，擋住一部分字 */
+  front?: boolean;
+};
+const shapes: Shape[] = [
+  { kind: 'cone', x: '7%', y: '3%', size: 'clamp(64px, 9vw, 132px)', depth: 26, rot: -16, dur: 7, phonePos: { x: '1%', y: '1%', scale: 0.6 }, colors: ['#f3d6ef', '#ababdc', '#4e5aa2'] },
+  { kind: 'torus', x: '80%', y: '1%', size: 'clamp(72px, 10vw, 146px)', depth: -22, rot: 14, dur: 8.5, phonePos: { x: '86%', y: '1%', scale: 0.55 }, colors: ['#c9e6f8', '#81a9ee', '#2f5175'] },
+  { kind: 'sphere', x: '2%', y: '40%', size: 'clamp(60px, 8vw, 122px)', depth: 38, dur: 6.5, front: true, colors: ['#f6dcf1', '#c3a7dc', '#5a5aa8'] },
+  { kind: 'yarn', x: '85%', y: '38%', size: 'clamp(70px, 9vw, 132px)', depth: -34, rot: -10, dur: 7.5, front: true, colors: ['#ffe9b5', '#aab4e7', '#3e668f'] },
+  { kind: 'cube', x: '11%', y: '74%', size: 'clamp(64px, 9vw, 130px)', depth: 22, rot: -6, dur: 9, colors: ['#e2dff5', '#ababdc', '#4e5aa2'], phone: false },
+  { kind: 'cylinder', x: '80%', y: '76%', size: 'clamp(56px, 8vw, 112px)', depth: -18, rot: 18, dur: 8, colors: ['#fff0c4', '#ffdb83', '#c48d22'], phone: false },
+];
+---
+
+<section class="home-hero" data-home-hero>
+  <div class="intro">
+    <p class="hi">{tr('hero.hi')} <em>{site.name[lang]}</em></p>
+    {
+      roles.length > 0 && (
+        <p class="roles" data-roles={JSON.stringify(roles)} aria-live="polite">
+          <span>{roles[0]}</span>
+        </p>
+      )
+    }
+  </div>
+
+  <div class="stage">
+    <div class="marquee" aria-hidden="true">
+      <div class="track">
+        <span>{marquee}&nbsp;{marquee}&nbsp;</span>
+        <span>{marquee}&nbsp;{marquee}&nbsp;</span>
+      </div>
+    </div>
+
+    <div class="card">
+      {
+        photo ? (
+          <Image src={photo} alt={site.name[lang]} widths={[320, 480, 640]} sizes="300px" loading="eager" />
+        ) : (
+          <>
+            <div class="face face-3d">
+              <Orb kind="cube" size="clamp(84px, 9vw, 128px)" spin />
+              <span class="lc">{tr('nav.3d')}</span>
+            </div>
+            <div class="face face-yarn">
+              <Orb kind="yarn" size="clamp(84px, 9vw, 128px)" />
+              <span class="lc">{tr('nav.yarn')}</span>
+            </div>
+          </>
+        )
+      }
+    </div>
+  </div>
+
+  <h1 class="tagline">{page.data.title}</h1>
+  <div class="ctas"><slot /></div>
+
+  {
+    shapes.map((s, i) => (
+      <div
+        class:list={['shape', { 'hide-phone': s.phone === false, front: s.front }]}
+        style={`--x:${s.x};--y:${s.y};--size:${s.size};--xp:${s.phonePos?.x ?? s.x};--yp:${s.phonePos?.y ?? s.y};--sp:${s.phonePos?.scale ?? 0.85};--d:${s.depth};--rot:${s.rot ?? 0}deg;--dur:${s.dur}s;--delay:${-i * 1.3}s`}
+        aria-hidden="true"
+      >
+        <div class="float">
+          <Shape3D kind={s.kind} colors={s.colors} id={`hero-shape-${i}`} />
+        </div>
+      </div>
+    ))
+  }
+</section>
+
+<script>
+  const hero = document.querySelector<HTMLElement>('[data-home-hero]');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 關鍵字輪流切換
+  const roles = hero?.querySelector<HTMLElement>('[data-roles]');
+  if (roles && !still) {
+    const list: string[] = JSON.parse(roles.dataset.roles!);
+    const span = roles.querySelector('span')!;
+    let i = 0;
+    setInterval(() => {
+      span.classList.add('out');
+      setTimeout(() => {
+        i = (i + 1) % list.length;
+        span.textContent = list[i];
+        span.classList.remove('out');
+      }, 300);
+    }, 2400);
+  }
+
+  // 滑鼠視差：-1 ~ 1
+  if (hero && !still && matchMedia('(hover: hover)').matches) {
+    hero.addEventListener('pointermove', (e) => {
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty('--mx', (((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
+      hero.style.setProperty('--my', (((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
+    });
+    hero.addEventListener('pointerleave', () => {
+      hero.style.setProperty('--mx', '0');
+      hero.style.setProperty('--my', '0');
+    });
+  }
+</script>
+
+<style>
+  .home-hero {
+    --mx: 0;
+    --my: 0;
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: clamp(14px, 2vw, 22px);
+    min-height: clamp(560px, 86svh, 860px);
+    padding-block: 48px 64px;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  /* ---------- 招呼語與輪流關鍵字 ---------- */
+  .intro {
+    position: relative;
+    z-index: 3;
+  }
+
+  .hi {
+    margin: 0;
+    font: 600 clamp(1.8rem, 3.6vw, 3rem) / 1.15 var(--font-display);
+  }
+
+  .hi em {
+    /* 斜體字最後一個字母會超出字框，漸層填色會把它切掉，右邊多留一點空間 */
+    display: inline-block;
+    padding-right: 0.12em;
+    margin-right: -0.12em;
+    font-style: italic;
+    background: var(--holo, linear-gradient(90deg, var(--sky), var(--leaf)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .roles {
+    height: 1.6em;
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    font-weight: 500;
+  }
+
+  .roles span {
+    display: inline-block;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .roles :global(span.out) {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  /* ---------- 跑馬燈大字 + 主角卡片 ---------- */
+  .stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+  }
+
+  .marquee {
+    position: absolute;
+    inset: 50% 0 auto;
+    z-index: 0;
+    overflow: hidden;
+    transform: translate(calc(var(--mx) * -14px), -50%);
+    transition: transform 0.4s ease-out;
+    pointer-events: none;
+  }
+
+  .track {
+    display: flex;
+    width: max-content;
+    animation: marquee 70s linear infinite;
+  }
+
+  .track span {
+    padding-right: 0.3em;
+    color: var(--ink);
+    font: 800 clamp(4.5rem, 13vw, 11rem) / 1 var(--font-display);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    opacity: 0.92;
+  }
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+
+  .card {
+    position: relative;
+    z-index: 2;
+    width: clamp(190px, 21vw, 290px);
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 28px;
+    box-shadow: 0 30px 60px rgb(0 0 0 / 0.35), 0 0 0 1px rgb(255 255 255 / 0.12);
+    transform: perspective(900px) rotateY(calc(var(--mx) * 7deg)) rotateX(calc(var(--my) * -7deg));
+    transition: transform 0.4s ease-out;
+  }
+
+  .card :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* 還沒放照片時：3D 與編織兩面輪流 */
+  .face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 14px;
+    color: #ffffff;
+    font: 700 1.4rem/1 var(--font-display);
+  }
+
+  .face-3d {
+    background:
+      radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.35), transparent 40%),
+      linear-gradient(160deg, #b7d3f4, #ababdc 40%, #7181c8 75%, #4e5aa2);
+  }
+
+  .face-yarn {
+    background:
+      radial-gradient(circle at 70% 20%, rgb(255 255 255 / 0.3), transparent 40%),
+      linear-gradient(170deg, #81a9ee, #aab4e7 45%, #ffdb83);
+    animation: swap 8s ease-in-out infinite;
+  }
+
+  .face span {
+    text-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+  }
+
+  @keyframes swap {
+    0%, 42% { opacity: 0; }
+    50%, 92% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* ---------- 標語與按鈕 ---------- */
+  .tagline {
+    position: relative;
+    z-index: 3;
+    max-width: 18em;
+    margin-top: 8px;
+    font-size: clamp(1.3rem, 2.4vw, 2rem);
+    font-weight: 700;
+  }
+
+  .ctas {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .ctas :global(.btn) {
+    padding: 0.9em 1.5em;
+    font-size: 1.05rem;
+  }
+
+  /* ---------- 漂浮的 3D 物件 ---------- */
+  .shape {
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    z-index: 1;
+    width: var(--size);
+    aspect-ratio: 1;
+    transform: translate3d(calc(var(--mx) * var(--d) * 1px), calc(var(--my) * var(--d) * 1px), 0);
+    transition: transform 0.5s ease-out;
+    pointer-events: none;
+  }
+
+  /* 左右中段的物件放在跑馬燈前面，擋住一部分大字 */
+  .shape.front {
+    z-index: 2;
+  }
+
+  .float {
+    width: 100%;
+    height: 100%;
+    transform: rotate(var(--rot));
+    animation: float var(--dur) ease-in-out var(--delay) infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(var(--rot)); }
+    50% { transform: translateY(-14px) rotate(calc(var(--rot) + 6deg)); }
+  }
+
+  @media (max-width: 809px) {
+    .home-hero {
+      min-height: auto;
+      padding-block: 32px 48px;
+    }
+
+    .hide-phone {
+      display: none;
+    }
+
+    .shape {
+      top: var(--yp);
+      left: var(--xp);
+      width: calc(var(--size) * var(--sp));
+    }
+
+    .card {
+      width: 58vw;
+      max-width: 240px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .track,
+    .float,
+    .face-yarn {
+      animation: none;
+    }
+  }
+</style>
