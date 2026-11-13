@@ -6,6 +6,7 @@ import YarnCard from '../components/YarnCard.astro';
 import ProcessSteps from '../components/ProcessSteps.astro';
 import ComingSoon from '../components/ComingSoon.astro';
 import { getLocalized, getPage } from '../lib/content';
+import { notices, faqs } from '../data/yarn-info';
 import { yarnNav } from '../lib/nav';
 import { localePath, otherLang, t } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
@@ -62,6 +63,38 @@ const daily = pieces.filter((p) => p.data.kind === 'daily');
     <h2 class="h2">{process.data.title}</h2>
     <div class="process-intro muted"><ProcessIntro /></div>
     {process.data.steps && <ProcessSteps steps={process.data.steps} />}
+
+    <!-- 手作須知：想訂製的人在這裡做決定，所以放在流程下面 -->
+    <div id="notice" class="notice">
+      <h3 class="notice-title">{tr('yarn.notice')}</h3>
+      <ul>
+        {
+          notices.map((n) => (
+            <li>
+              <strong>{n.title[lang]}</strong>
+              <span class="muted">{n.text[lang]}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section id="faq" class="section faq">
+    <h2 class="h2">{tr('yarn.faq')}</h2>
+    <div class="faq-list">
+      {
+        faqs.map((f, i) => (
+          <details class="card" open={i === 0}>
+            <summary>{f.q[lang]}</summary>
+            <p class="muted">{f.a[lang]}</p>
+          </details>
+        ))
+      }
+    </div>
+    <p class="faq-more muted">
+      <a href={localePath(lang, '#contact')}>{tr('yarn.faqMore')}</a>
+    </p>
   </section>
 
   <section id="soon" class="section soon-section">
@@ -106,6 +139,91 @@ const daily = pieces.filter((p) => p.data.kind === 'daily');
 
   .process-intro {
     margin: -28px auto 32px;
+    text-align: center;
+  }
+
+  .notice {
+    max-width: 52em;
+    margin: clamp(36px, 5vw, 56px) auto 0;
+    padding: clamp(20px, 3vw, 28px);
+    border: 1.5px dashed var(--dash);
+    border-radius: var(--radius);
+  }
+
+  .notice-title {
+    margin: 0 0 14px;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .notice ul {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .notice li {
+    display: grid;
+    grid-template-columns: 7em 1fr;
+    gap: 12px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 809px) {
+    .notice li {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+
+  .faq-list {
+    display: grid;
+    gap: 10px;
+    max-width: 52em;
+    margin: 0 auto;
+  }
+
+  .faq details {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .faq summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq summary::after {
+    content: '+';
+    flex-shrink: 0;
+    font-weight: 400;
+    transition: transform 0.2s;
+  }
+
+  .faq details[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  .faq details p {
+    margin: 0;
+    padding: 0 20px 18px;
+    line-height: 1.7;
+  }
+
+  .faq-more {
+    margin: 20px 0 0;
     text-align: center;
   }
 

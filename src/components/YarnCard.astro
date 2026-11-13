@@ -12,7 +12,7 @@ interface Props {
 }
 
 const { entry, lang, index } = Astro.props;
-const { title, summary, status, kind, cover } = entry.data;
+const { title, summary, status, kind, cover, price } = entry.data;
 // 手作日常不接單，標籤改顯示「手作日常」
 const tagClass = kind === 'daily' ? 'daily' : status;
 const tagLabel = kind === 'daily' ? t(lang)('yarn.daily') : t(lang)(`yarn.status.${status}`);
@@ -40,6 +40,7 @@ const href = localePath(lang, `yarn/${splitId(entry.id).slug}/`);
       <span class:list={['tag', tagClass]}>{tagLabel}</span>
     </div>
     <p class="muted">{summary}</p>
+    {price && kind !== 'daily' && <p class="price">NT$ {price.toLocaleString('en-US')}</p>}
   </div>
   </a>
 </article>
@@ -130,6 +131,12 @@ const href = localePath(lang, `yarn/${splitId(entry.id).slug}/`);
     margin: 6px 0 0;
     font-size: 0.88rem;
   }
+
+  p.price {
+    margin-top: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
   @media (max-width: 809px) {
     .info {
       padding: 4px 10px 12px;
@@ -141,6 +148,10 @@ const href = localePath(lang, `yarn/${splitId(entry.id).slug}/`);
 
     p {
       font-size: 0.8rem;
+    }
+
+    p.price {
+      font-size: 0.88rem;
     }
   }
 </style>

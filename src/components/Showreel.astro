@@ -1,0 +1,250 @@
+---
+// Showreel：平常靜音循環播放片段，點了播放完整版（有聲音、有播放控制）
+// 影片放 public/videos/：teaser 是循環播放的短片段，full 是完整版
+import { Image } from 'astro:assets';
+import poster from '../assets/images/showreel-poster.jpg';
+import { assetUrl, t } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** 顯示切換鈕，可以改看較早的 Project Reel（3D 頁用） */
+  withOlder?: boolean;
+}
+
+const { lang, withOlder = false } = Astro.props;
+const older = { title: 'Project Reel', full: 'videos/project-reel.mp4' };
+const tr = t(lang);
+const reel = { title: '2024 Showreel', teaser: 'videos/showreel-2024-teaser.mp4', full: 'videos/showreel-2024.mp4' };
+---
+
+  {
+    withOlder && (
+      <div class="tabs" role="group" aria-label="Showreel">
+        <button type="button" class="tab active" data-reel-tab={assetUrl(reel.full)} aria-pressed="true">{reel.title}</button>
+        <button type="button" class="tab" data-reel-tab={assetUrl(older.full)} aria-pressed="false">{older.title} <span class="muted">· {tr('reel.older')}</span></button>
+      </div>
+    )
+  }
+  <div class="reel" data-reel>
+    <div class="media">
+      <Image src={poster} alt="" widths={[800, 1200, 1600]} sizes="(min-width: 1000px) 70vw, 100vw" />
+      <video class="teaser" muted loop playsinline preload="none" data-src={assetUrl(reel.teaser)} aria-hidden="true"></video>
+      <video class="full" playsinline preload="none" controls data-src={assetUrl(reel.full)} hidden></video>
+    </div>
+    <span class="tag label">{tr('projects.featured')}</span>
+    <button class="play" type="button" data-reel-play>
+      <span class="icon" aria-hidden="true">▶</span>
+      <span>{tr('reel.play')}</span>
+    </button>
+    <div class="caption">
+      <h2>{reel.title}</h2>
+      <p>{tr('reel.desc')}</p>
+    </div>
+  </div>
+
+
+<script>
+  // Showreel：進到畫面才載入並播放靜音片段；按播放鍵換成完整版
+  const reelBox = document.querySelector<HTMLElement>('[data-reel]');
+  if (reelBox) {
+    const teaser = reelBox.querySelector<HTMLVideoElement>('video.teaser')!;
+    const full = reelBox.querySelector<HTMLVideoElement>('video.full')!;
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!still) {
+      new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (reelBox.classList.contains('playing-full')) continue;
+          if (e.isIntersecting) {
+            if (!teaser.src) teaser.src = teaser.dataset.src!;
+            teaser.play().then(() => teaser.classList.add('playing')).catch(() => {});
+          } else {
+            teaser.pause();
+          }
+        }
+      }, { threshold: 0.25 }).observe(reelBox);
+    }
+    const playFull = (src: string) => {
+      teaser.pause();
+      if (full.src !== new URL(src, location.href).href) full.src = src;
+      full.hidden = false;
+      reelBox.classList.add('playing-full');
+      full.play().catch(() => {});
+    };
+    reelBox.querySelector('[data-reel-play]')!.addEventListener('click', () => playFull(full.dataset.src!));
+
+    // 切換 2024 Showreel / 較早的 Project Reel
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-reel-tab]')];
+    tabs.forEach((tab) =>
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => {
+          t.classList.toggle('active', t === tab);
+          t.setAttribute('aria-pressed', String(t === tab));
+        });
+        full.dataset.src = tab.dataset.reelTab!;
+        playFull(tab.dataset.reelTab!);
+      }),
+    );
+  }
+
+</script>
+
+<style>
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .tab {
+    padding: 6px 14px;
+    border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+    border-radius: 999px;
+    color: var(--ink);
+    background: transparent;
+    font: 500 0.88rem/1.2 var(--font-body);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .tab:hover {
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+
+  .tab.active {
+    border-color: transparent;
+    color: #1a1840;
+    background: var(--ink);
+  }
+
+  .tab.active .muted {
+    color: inherit;
+    opacity: 0.7;
+  }
+
+  .reel {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius);
+    color: var(--white);
+    background: #000;
+  }
+
+  .media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+  }
+
+  .media :global(img),
+  .media video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .media .teaser {
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  .media .teaser:global(.playing) {
+    opacity: 1;
+  }
+
+  .media .full[hidden] {
+    display: none;
+  }
+
+  .media .full {
+    z-index: 2;
+    object-fit: contain;
+    background: #000;
+  }
+
+  .media::after {
+    content: '';
+    position: absolute;
+    inset: 45% 0 0;
+    background: linear-gradient(transparent, rgb(10 10 20 / 0.6));
+    pointer-events: none;
+  }
+
+  .label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 1;
+    color: var(--ink);
+  }
+
+  html:lang(en) .label {
+    text-transform: lowercase;
+  }
+
+  .play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.8em 1.4em 0.8em 0.9em;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    border-radius: 999px;
+    color: #fff;
+    background: rgb(20 20 40 / 0.45);
+    backdrop-filter: blur(10px);
+    font: 600 1rem/1 var(--font-display);
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: transform 0.25s, background 0.25s;
+  }
+
+  .play:hover {
+    background: rgb(20 20 40 / 0.65);
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+
+  .play .icon {
+    display: grid;
+    place-items: center;
+    width: 2.2em;
+    height: 2.2em;
+    border-radius: 50%;
+    color: #1a1840;
+    background: #fff;
+    font-size: 0.8em;
+    padding-left: 0.15em;
+  }
+
+  .caption {
+    position: absolute;
+    right: 20px;
+    bottom: 16px;
+    left: 20px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .caption h2 {
+    font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+    font-weight: 600;
+  }
+
+  .caption p {
+    margin: 2px 0 0;
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+
+  /* 播放完整版時，把按鈕、標籤和說明收起來，讓影片控制列可以點 */
+  .playing-full :is(.play, .label, .caption),
+  .playing-full .media::after {
+    display: none;
+  }
+
+</style>

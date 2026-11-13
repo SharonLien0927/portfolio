@@ -17,7 +17,7 @@ const { lang, slug } = Astro.props;
 const tr = t(lang);
 const entry = (await getEntry('yarn', `${lang}/${slug}`))!;
 const { Content } = await render(entry);
-const { title, summary, status, kind, technique, yarn, size, cover, gallery } = entry.data;
+const { title, summary, status, kind, technique, yarn, size, cover, gallery, price } = entry.data;
 const daily = kind === 'daily';
 
 // 另一個語言有同名檔案就連過去，沒有就回另一個語言的編織頁
@@ -95,6 +95,9 @@ const photos = [cover, ...gallery].filter((img) => img !== undefined);
       <div class="info">
         <h1>{title}</h1>
         <p class="summary muted">{summary}</p>
+        {price && !daily && (
+          <p class="price"><span class="muted lc">{tr('yarn.priceFrom')}</span> NT$ {price.toLocaleString('en-US')}</p>
+        )}
         <dl class="meta">
           {
             meta.map((m) => (
@@ -109,7 +112,12 @@ const photos = [cover, ...gallery].filter((img) => img !== undefined);
         {daily ? (
           <p class="daily-note muted">{tr('yarn.dailyIntro')}</p>
         ) : (
-          <a class="btn btn--leaf lc" href={localePath(lang, '#contact')}>{tr('yarn.cta')} →</a>
+          <>
+            <a class="btn btn--leaf lc" href={localePath(lang, '#contact')}>{tr('yarn.cta')} →</a>
+            <p class="hand-note muted">
+              {tr('yarn.handNote')} <a href={localePath(lang, 'yarn/#notice')}>{tr('yarn.noticeLink')} →</a>
+            </p>
+          </>
         )}
       </div>
     </div>
@@ -347,6 +355,26 @@ const photos = [cover, ...gallery].filter((img) => img !== undefined);
 
   .prose {
     margin-bottom: 28px;
+  }
+
+  .price {
+    margin: -12px 0 24px;
+    font: 600 1.4rem/1.2 var(--font-display);
+  }
+
+  .price span {
+    margin-right: 6px;
+    font: 500 0.8rem/1 var(--font-body, inherit);
+  }
+
+  .hand-note {
+    margin: 14px 0 0;
+    font-size: 0.85rem;
+  }
+
+  .hand-note a {
+    color: inherit;
+    text-underline-offset: 3px;
   }
 
   .daily-note {

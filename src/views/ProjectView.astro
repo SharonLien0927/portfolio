@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import YouTube from '../components/YouTube.astro';
 import { getLocalized, splitId } from '../lib/content';
 import { threeDNav } from '../lib/nav';
 import { assetUrl, localePath, otherLang, t } from '../i18n/utils';
@@ -16,7 +17,7 @@ const { lang, slug } = Astro.props;
 const tr = t(lang);
 const entry = (await getEntry('projects', `${lang}/${slug}`))!;
 const { Content } = await render(entry);
-const { title, summary, year, role, client, tags, cover, video, film, tools, duration, links, galleries } = entry.data;
+const { title, summary, year, role, client, tags, cover, video, film, youtube, videoGroups, tools, duration, links, galleries } = entry.data;
 
 // 另一個語言有同名檔案就連過去，沒有就回另一個語言的作品列表
 const other = otherLang(lang);
@@ -59,7 +60,9 @@ const nav = threeDNav(lang, false);
 
     <div class="hero-media">
       {
-        film ? (
+        youtube ? (
+          <YouTube url={youtube} title={title} poster={cover} large />
+        ) : film ? (
           <video src={assetUrl(film)} poster={cover?.src} controls playsinline preload="metadata" />
         ) : video ? (
           <video src={assetUrl(video)} poster={cover?.src} autoplay muted loop playsinline />
@@ -85,15 +88,38 @@ const nav = threeDNav(lang, false);
     <div class="prose content"><Content /></div>
 
     {
+      videoGroups.map((g) => (
+        <section class="gallery videos">
+          <h2>{g.title}</h2>
+          {g.note && <p class="muted">{g.note}</p>}
+          <div class="grid" style={`--cols: ${g.cols}`}>
+            {g.items.map((v) => (
+              <figure>
+                <div class="frame">
+                  {v.youtube ? (
+                    <YouTube url={v.youtube} title={`${title}｜${v.title}`} />
+                  ) : (
+                    v.src && <video src={assetUrl(v.src)} poster={v.poster && assetUrl(v.poster)} controls playsinline preload="metadata" />
+                  )}
+                </div>
+                <figcaption class="muted">{v.title}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      ))
+    }
+
+    {
       galleries.map((g) => (
         <section class="gallery">
           <h2>{g.title}</h2>
           {g.note && <p class="muted">{g.note}</p>}
           <div class="grid" style={`--cols: ${g.cols}`}>
             {g.images.map((img) => (
-              <a href={img.src} target="_blank" rel="noopener">
+              <div class="shot">
                 <Image src={img} alt="" widths={[480, 800, 1200]} sizes={`(min-width: 810px) ${Math.round(100 / g.cols)}vw, 100vw`} />
-              </a>
+              </div>
             ))}
           </div>
         </section>
@@ -214,10 +240,33 @@ const nav = threeDNav(lang, false);
     margin-top: 20px;
   }
 
-  .gallery .grid a {
+  .videos figure {
+    margin: 0;
+  }
+
+  .videos .frame {
+    overflow: hidden;
+    border-radius: 14px;
+    background: #000;
+  }
+
+  .videos video {
+    display: block;
+    width: 100%;
+    max-height: 70vh;
+  }
+
+  .videos figcaption {
+    margin-top: 6px;
+    font-size: 0.85rem;
+  }
+
+  .gallery .grid .shot {
     display: block;
     overflow: hidden;
     border-radius: 14px;
+    /* 去背的產品圖（透明 PNG）襯一個淡淡的底色 */
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
   }
 
   .gallery .grid :global(img) {
@@ -225,10 +274,6 @@ const nav = threeDNav(lang, false);
     width: 100%;
     height: auto;
     transition: transform 0.4s ease;
-  }
-
-  .gallery .grid a:hover :global(img) {
-    transform: scale(1.03);
   }
 
   @media (max-width: 809px) {

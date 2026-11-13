@@ -22,6 +22,19 @@ const projects = defineCollection({
       video: z.string().optional(),
       // 案例頁上方的完整影片（有播放控制），放 public/videos/
       film: z.string().optional(),
+      // 案例頁上方改放 YouTube 影片（有填就優先使用）
+      youtube: z.string().optional(),
+      // 案例頁下方的影片區塊，例如「360° 環繞導覽」；每支影片填 youtube 網址，或 src（public/videos/ 裡的檔案）
+      videoGroups: z
+        .array(
+          z.object({
+            title: z.string(),
+            note: z.string().optional(),
+            cols: z.number().default(2),
+            items: z.array(z.object({ title: z.string(), youtube: z.string().optional(), src: z.string().optional(), poster: z.string().optional() })),
+          }),
+        )
+        .default([]),
       tools: z.string().optional(),
       duration: z.string().optional(),
       // 公開成果的連結（YouTube、網站…）
@@ -57,6 +70,8 @@ const yarn = defineCollection({
       technique: z.enum(['knit', 'crochet', 'mixed']).optional(),
       yarn: z.string().optional(),
       size: z.string().optional(),
+      // 參考價格（新台幣），不填就不顯示
+      price: z.number().optional(),
       cover: image().optional(),
       // 作品頁下方的更多照片
       gallery: z.array(image()).default([]),

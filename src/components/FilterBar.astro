@@ -29,6 +29,8 @@ const { label, allLabel, categories, target } = Astro.props;
       for (const item of grid.children as HTMLCollectionOf<HTMLElement>) {
         item.hidden = !!value && item.dataset.category !== value;
       }
+      // 通知格子換了分類（3D 頁用來決定要不要收合）
+      grid.dispatchEvent(new CustomEvent('filterchange', { detail: value ?? '' }));
     });
   }
 </script>

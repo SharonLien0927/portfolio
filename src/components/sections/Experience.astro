@@ -1,0 +1,240 @@
+---
+// 3D 頁的「經歷與能力」：定位、三個核心能力、工作經歷、學歷、技能、合作品牌
+// 內容在 src/data/career.ts
+import { career } from '../../data/career';
+import { t } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+// 技能可以寫「中文|English」，依語言取對應的那一段
+const skill = (s: string) => {
+  const [zh, en = zh] = s.split('|');
+  return lang === 'en' ? en : zh;
+};
+---
+
+<section id="experience" class="section experience">
+  <h2 class="h2">{tr('exp.title')}</h2>
+  <p class="headline">{career.headline[lang]}</p>
+
+  <ul class="strengths">
+    {
+      career.strengths.map((s, i) => (
+        <li>
+          <span class="num">{String(i + 1).padStart(2, '0')}</span>
+          <h3>{s.title[lang]}</h3>
+          <p class="muted">{s.text[lang]}</p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="cols">
+    <div class="timeline">
+      <h3 class="sub lc">{tr('exp.jobs')}</h3>
+      <ol>
+        {
+          career.jobs.map((job) => (
+            <li>
+              <p class="period">{job.period.replace('now', lang === 'en' ? 'Present' : '現在')}</p>
+              <h4>{job.company[lang]}</h4>
+              <p class="role muted">{job.role[lang]}</p>
+              <ul class="points">
+                {job.points[lang].map((pt) => <li>{pt}</li>)}
+              </ul>
+            </li>
+          ))
+        }
+      </ol>
+      <h3 class="sub lc">{tr('exp.education')}</h3>
+      <p class="edu">{career.education[lang]}</p>
+    </div>
+
+    <div class="side-info">
+      <h3 class="sub lc">{tr('exp.skills')}</h3>
+      <dl class="skills">
+        {
+          career.skills.map((g) => (
+            <div>
+              <dt class="muted">{g.group[lang]}</dt>
+              <dd>
+                {g.items.map((it) => <span class="chip">{skill(it)}</span>)}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <h3 class="sub lc">{tr('exp.clients')}</h3>
+      <p class="clients">{career.clients[lang].join(' · ')}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .headline {
+    max-width: 36em;
+    margin: calc(-1 * clamp(14px, 2vw, 28px)) auto clamp(32px, 4vw, 48px);
+    color: var(--muted);
+    font-size: 1.05rem;
+    text-align: center;
+  }
+
+  .strengths {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0 0 clamp(40px, 5vw, 64px);
+    padding: 0;
+    list-style: none;
+  }
+
+  .strengths li {
+    padding: 20px 20px 22px;
+    border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--ink) 4%, transparent);
+  }
+
+  .num {
+    display: block;
+    margin-bottom: 14px;
+    color: var(--lavender, var(--sky));
+    font: 700 0.85rem/1 var(--font-display);
+    letter-spacing: 0.08em;
+  }
+
+  .strengths h3 {
+    margin-bottom: 8px;
+    font-size: 1.15rem;
+  }
+
+  .strengths p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 56px);
+  }
+
+  .sub {
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px dashed var(--dash);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .timeline ol {
+    margin: 0 0 36px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .timeline > ol > li {
+    position: relative;
+    padding: 0 0 28px 22px;
+    border-left: 1.5px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  }
+
+  .timeline > ol > li:last-child {
+    padding-bottom: 4px;
+  }
+
+  .timeline > ol > li::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: -6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--lavender, var(--sky));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--lavender, var(--sky)) 25%, transparent);
+  }
+
+  .period {
+    margin: 0 0 4px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  h4 {
+    margin: 0;
+    font: 600 1.2rem/1.3 var(--font-display);
+  }
+
+  .role {
+    margin: 2px 0 10px;
+    font-size: 0.92rem;
+  }
+
+  .points {
+    margin: 0;
+    padding-left: 1.1em;
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .points li + li {
+    margin-top: 4px;
+  }
+
+  .edu {
+    margin: 0;
+  }
+
+  .skills {
+    display: grid;
+    gap: 14px;
+    margin: 0 0 36px;
+  }
+
+  .skills dt {
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+  }
+
+  .skills dd {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+  }
+
+  .chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ink) 9%, transparent);
+    font-size: 0.85rem;
+  }
+
+  .clients {
+    margin: 0;
+    line-height: 1.8;
+  }
+
+  @media (max-width: 1199px) {
+    .cols {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 809px) {
+    .strengths {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

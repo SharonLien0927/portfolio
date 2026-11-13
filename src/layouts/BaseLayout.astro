@@ -69,7 +69,7 @@ const contactHref = nav.find((i) => i.id === 'contact')?.href ?? localePath(lang
     <div class="shell">
       <Sidebar lang={lang} alternate={alternate} items={nav} current={current} />
       <main class="main" id="main">
-        <TopBar lang={lang} alternate={alternate} status={hero.data.eyebrow} since={hero.data.since} intro={intro} />
+        <TopBar lang={lang} alternate={alternate} status={zone === '3d' ? undefined : hero.data.eyebrow} since={hero.data.since} intro={intro} />
         <slot />
         <Footer lang={lang} contactHref={contactHref} />
       </main>

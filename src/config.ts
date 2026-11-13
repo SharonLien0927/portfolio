@@ -4,6 +4,9 @@ export const site = {
   theme: 'night' as 'butter' | 'crystal' | 'dream' | 'night',
   name: { 'zh-tw': 'Sharon', en: 'Sharon' },
   email: 'sharon1062001@gmail.com',
+  // 3D 頁（求職用）的聯絡區：LinkedIn 個人頁網址、履歷 PDF（放在 public/ 底下，例如 'resume.pdf'）。留空就不顯示
+  linkedin: '',
+  resume: '',
   socials: [
     { label: 'Instagram', href: 'https://instagram.com/' },
     { label: 'Behance', href: 'https://behance.net/' },

@@ -16,6 +16,7 @@ interface Props {
 
 const { lang, alternate, items, current } = Astro.props;
 const tr = t(lang);
+const hire = items.find((i) => i.id === 'hire');
 ---
 
 <aside class="side" data-sidebar>
@@ -82,8 +83,9 @@ const tr = t(lang);
     </nav>
 
     <div class="bottom">
-      <p class="cta lc">{tr('side.cta')}</p>
-      <a class="btn" href={items.find((i) => i.id === 'contact')?.href ?? localePath(lang, '#contact')}>{tr('side.ctaBtn')}</a>
+      {/* 3D 區（求職用）的選單底部改成徵才語氣，連到 3D 頁的聯絡區 */}
+      <p class="cta lc">{hire ? tr('side.ctaHire') : tr('side.cta')}</p>
+      <a class="btn" href={hire?.href ?? items.find((i) => i.id === 'contact')?.href ?? localePath(lang, '#contact')}>{tr('side.ctaBtn')}</a>
       <div class="foot">
         <div class="foot-row">
           <small>© {new Date().getFullYear()} {site.name[lang]}</small>

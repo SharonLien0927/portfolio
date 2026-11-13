@@ -71,13 +71,14 @@ export function threeDNav(lang: Lang, onPage = true): NavItem[] {
   const anchor = (id: string) => (onPage ? `#${id}` : localePath(lang, `3d/#${id}`));
   return [
     { id: 'works', href: anchor('works'), label: tr('threeD.works'), detail: { text: tr('side.3dText') } },
+    { id: 'experience', href: anchor('experience'), label: tr('exp.title'), detail: { text: tr('side.expText') } },
     {
       id: 'process',
       href: anchor('process'),
       label: tr('nav.process3d'),
-      detail: { path: { label: tr('side.path'), steps: [tr('side.path1'), tr('side.path2'), tr('side.path3')] } },
+      detail: { path: { label: tr('nav.process3d'), steps: [tr('side.work1'), tr('side.work2'), tr('side.work3')] } },
     },
-    { id: 'contact', href: localePath(lang, '#contact'), label: tr('nav.contact'), detail: { text: tr('side.contactText') } },
+    { id: 'hire', href: anchor('hire'), label: tr('nav.contact'), detail: { text: tr('side.hireText') } },
     { id: 'yarn', href: localePath(lang, 'yarn/'), label: tr('nav.yarn'), detail: { text: tr('side.yarnText') } },
   ];
 }
@@ -95,6 +96,7 @@ export function yarnNav(lang: Lang, onPage = true): NavItem[] {
       label: tr('nav.process'),
       detail: { path: { label: tr('side.path'), steps: [tr('side.path1'), tr('side.path2'), tr('side.path3')] } },
     },
+    { id: 'faq', href: anchor('faq'), label: tr('yarn.faq'), detail: { text: tr('yarn.handNote') } },
     { id: 'soon', href: anchor('soon'), label: tr('nav.soon'), detail: { text: tr('side.soonText') } },
     { id: 'contact', href: localePath(lang, '#contact'), label: tr('nav.contact'), detail: { text: tr('side.contactText') } },
     { id: '3d', href: localePath(lang, '3d/'), label: tr('nav.3d'), detail: { text: tr('side.3dText') } },

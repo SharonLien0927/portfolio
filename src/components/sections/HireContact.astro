@@ -1,0 +1,64 @@
+---
+// 3D 頁最下方的聯絡區（求職用）：Email、LinkedIn、履歷下載
+// LinkedIn 與履歷在 src/config.ts 設定，留空就不顯示
+import { site } from '../../config';
+import { assetUrl, t } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+---
+
+<section id="hire" class="section hire">
+  <div class="card">
+    <h2>{tr('hire.title')}</h2>
+    <p class="muted">{tr('hire.text')}</p>
+    <div class="actions">
+      <a class="btn btn--sky lc" href={`mailto:${site.email}`}>{site.email}</a>
+      {site.linkedin && <a class="btn btn--butter lc" href={site.linkedin} target="_blank" rel="noopener">LinkedIn ↗</a>}
+      {site.resume && <a class="btn btn--butter lc" href={assetUrl(site.resume)} download>{tr('hire.resume')} ↓</a>}
+    </div>
+  </div>
+</section>
+
+<style>
+  .hire {
+    padding-bottom: 0;
+  }
+
+  .card {
+    max-width: 760px;
+    margin-inline: auto;
+    padding: clamp(32px, 5vw, 56px);
+    border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(80% 120% at 50% 0%, color-mix(in srgb, var(--lavender, var(--sky)) 22%, transparent), transparent 70%),
+      color-mix(in srgb, var(--ink) 4%, transparent);
+    text-align: center;
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 3.6vw, 2.4rem);
+  }
+
+  p {
+    max-width: 30em;
+    margin: 12px auto 28px;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .actions .btn {
+    text-transform: none;
+  }
+</style>
